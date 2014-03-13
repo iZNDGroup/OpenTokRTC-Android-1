@@ -30,7 +30,7 @@ public class SubscriberControlFragment extends Fragment implements
 
     public interface SubscriberCallbacks {
         public void onMuteSubscriber();
-
+        public void onStatusSubBar();
     }
 
     private static SubscriberCallbacks sOpenTokCallbacks = new SubscriberCallbacks() {
@@ -40,6 +40,11 @@ public class SubscriberControlFragment extends Fragment implements
             return;
         }
 
+
+        @Override
+        public void onStatusSubBar() {
+            return;
+        }
     };
 
     @Override
@@ -140,6 +145,7 @@ public class SubscriberControlFragment extends Fragment implements
         @Override
         public void run() {
             showSubscriberWidget(false);
+            updateStatusSubBar();
         }
     };
 
@@ -165,6 +171,10 @@ public class SubscriberControlFragment extends Fragment implements
         initSubscriberUI();
     }
 
+    public void updateStatusSubBar() {
+        mCallbacks.onStatusSubBar();
+    }
+    
     public void muteSubscriber() {
         mCallbacks.onMuteSubscriber();
 

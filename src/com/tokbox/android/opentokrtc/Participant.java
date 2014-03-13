@@ -5,10 +5,11 @@ import android.content.Context;
 import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.Stream;
 import com.opentok.android.Subscriber;
+import com.opentok.android.SubscriberKit;
 
 public class Participant extends Subscriber {
 
-    private String userId;
+	private String userId;
     private String name;
         
     public Participant(Context context, Stream stream) {
@@ -35,6 +36,12 @@ public class Participant extends Subscriber {
         this.name = name;
     }
 
-    
+
+    @Override
+	protected void onVideoDisabled(SubscriberKit subscriber) {
+		super.onVideoDisabled(subscriber);
+		this.setSubscribeToVideo(true);
+	}
+
 
 }

@@ -36,6 +36,8 @@ public class PublisherControlFragment extends Fragment implements
         public void onSwapCamera();
 
         public void onEndCall();
+        
+        public void onStatusPubBar();
     }
 
     private static PublisherCallbacks sOpenTokCallbacks = new PublisherCallbacks() {
@@ -54,6 +56,12 @@ public class PublisherControlFragment extends Fragment implements
         public void onEndCall() {
             return;
         }
+        
+        @Override
+        public void onStatusPubBar() {
+            return;
+        }
+        
     };
 
     @Override
@@ -159,14 +167,10 @@ public class PublisherControlFragment extends Fragment implements
             break;
 
         }
-
     }
 
-    public void mutePublisher() {
-        mCallbacks.onMutePublisher();
-
-        mPublisherMute.setImageResource(chatRoomActivity.getmRoom().getmPublisher()
-                .getPublishAudio() ? R.drawable.mute : R.drawable.unmute);
+    public void updateStatusPubBar() {
+        mCallbacks.onStatusPubBar();
     }
 
     public void swapCamera() {
@@ -175,6 +179,13 @@ public class PublisherControlFragment extends Fragment implements
 
     public void endCall() {
         mCallbacks.onEndCall();
+    }
+    
+    public void mutePublisher() {
+        mCallbacks.onMutePublisher();
+
+        mPublisherMute.setImageResource(chatRoomActivity.getmRoom().getmPublisher()
+                .getPublishAudio() ? R.drawable.mute : R.drawable.unmute);
     }
 
     public void initPublisherUI() {
@@ -191,6 +202,7 @@ public class PublisherControlFragment extends Fragment implements
         @Override
         public void run() {
         	showPublisherWidget(false);
+        	updateStatusPubBar();
         }
     };
 
@@ -216,9 +228,4 @@ public class PublisherControlFragment extends Fragment implements
         initPublisherUI();
     }
     
-    public boolean ismPublisherWidgetVisible() {
-		return mPublisherWidgetVisible;
-	}
-
-
 }

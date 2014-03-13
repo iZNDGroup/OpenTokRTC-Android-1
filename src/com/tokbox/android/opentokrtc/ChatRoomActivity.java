@@ -27,6 +27,7 @@ import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -45,7 +46,9 @@ public class ChatRoomActivity extends Activity implements
 	private boolean mSubscriberVideoOnly = false;
 
 	private RelativeLayout mMessageBox;
-
+	private RelativeLayout fragmentPubContainer;
+	private RelativeLayout fragmentSubContainer;
+	
 	// Fragments
 	private SubscriberControlFragment mSubscriberFragment;
 	private PublisherControlFragment mPublisherFragment;
@@ -58,7 +61,8 @@ public class ChatRoomActivity extends Activity implements
 		// Show the Up button in the action bar.
 		// getActionBar().setDisplayHomeAsUpEnabled(true);
 
-		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		// Stop screen from going to sleep
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -78,6 +82,9 @@ public class ChatRoomActivity extends Activity implements
 
 		mPlayersView = (ViewPager) findViewById(R.id.pager);
 
+		fragmentPubContainer = (RelativeLayout) findViewById(R.id.fragment_pub_container);
+		fragmentSubContainer  = (RelativeLayout) findViewById(R.id.fragment_sub_container);
+		
 		if (savedInstanceState == null) {
 			initSubscriberFragment();
 			initPublisherFragment();
@@ -157,7 +164,8 @@ public class ChatRoomActivity extends Activity implements
 				apiKey = roomJson.getString("apiKey");
 				mDidCompleteSuccessfully = true;
 			} catch (Exception exception) {
-				Log.e(LOGTAG, "could not get room data: " + exception.getMessage());
+				Log.e(LOGTAG,
+						"could not get room data: " + exception.getMessage());
 				mDidCompleteSuccessfully = false;
 				return null;
 			}
@@ -227,10 +235,11 @@ public class ChatRoomActivity extends Activity implements
 
 	public void onPublisherViewClick(View v) {
 		if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
-			mRoom.getmCurrentParticipant().getView().setOnClickListener(onPublisherUIClick);
+			mRoom.getmCurrentParticipant().getView()
+					.setOnClickListener(onPublisherUIClick);
 		}
 	}
-	
+
 	public void loadInterface() {
 
 		// Surfaceview ordering hack for 2.3 devices
@@ -257,7 +266,7 @@ public class ChatRoomActivity extends Activity implements
 	public void initPublisherFragment() {
 		mPublisherFragment = new PublisherControlFragment();
 		getFragmentManager().beginTransaction()
-				.add(R.id.fragment_pub_port_container, mPublisherFragment)
+				.add(R.id.fragment_pub_container, mPublisherFragment)
 				.commit();
 	}
 
@@ -274,7 +283,8 @@ public class ChatRoomActivity extends Activity implements
 	public void setmHandler(Handler mHandler) {
 		this.mHandler = mHandler;
 	}
-	public Handler getmHandler( ) {
+
+	public Handler getmHandler() {
 		return this.mHandler;
 	}
 
@@ -308,20 +318,71 @@ public class ChatRoomActivity extends Activity implements
 		}
 		finish();
 	}
-	
-	private OnClickListener onSubscriberUIClick = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-        	Log.i(LOGTAG, "onClick subscriber UI");
-            mSubscriberFragment.subscriberClick();
-        }
-    };
 
-    private OnClickListener onPublisherUIClick = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-        	Log.i(LOGTAG, "onClick publisher UI");
-            mPublisherFragment.publisherClick();
-        }
-    };
+	private OnClickListener onSubscriberUIClick = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Log.i(LOGTAG, "onClick subscriber UI");
+			mSubscriberFragment.subscriberClick();
+			showSubFragment();
+		}
+	};
+
+	private OnClickListener onPublisherUIClick = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Log.i(LOGTAG, "onClick publisher UI");
+			mPublisherFragment.publisherClick();
+			showPubFragment();
+		}
+	};
+	
+	@Override
+	public void onStatusPubBar() {
+		showPubFragment();
+	}
+	@Override
+	public void onStatusSubBar() {
+		showSubFragment();	
+	}
+	
+	public void showPubFragment(){
+		
+		if (fragmentPubContainer.getVisibility() == View.GONE) {
+			Log.i(LOGTAG, "onClick VISIBLE");
+			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
+					.getLayoutParams();
+			params.bottomMargin = dpToPx(58);;
+			mPreview.setLayoutParams(params);
+			fragmentPubContainer.setVisibility(View.VISIBLE);
+		} else {
+			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
+					.getLayoutParams();
+			params.addRule(RelativeLayout.ALIGN_BOTTOM);
+			params.bottomMargin = dpToPx(10);
+			mPreview.setLayoutParams(params);
+			fragmentPubContainer.setVisibility(View.GONE);
+
+		}
+	}
+	
+	public void showSubFragment(){
+		
+		if (fragmentSubContainer.getVisibility() == View.GONE) {
+			fragmentSubContainer.setVisibility(View.VISIBLE);
+		} else {
+			fragmentSubContainer.setVisibility(View.GONE);
+		}
+	}
+	
+	/**
+     * Converts dp to real pixels, according to the screen density.
+     * @param dp A number of density-independent pixels.
+     * @return The equivalent number of real pixels.
+     */
+    private int dpToPx(int dp) {
+        double screenDensity = this.getResources().getDisplayMetrics().density;
+        return (int) (screenDensity * (double) dp);
+    }
+
 }
