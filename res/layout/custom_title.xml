@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:id="@+id/title_bar"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#000000"
+   >
+   <ImageView
+        android:id="@+id/icon"
+        android:contentDescription="@string/app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:src="@drawable/ic_launcher" />
+
+    <TextView android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/icon"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:text="@string/app_name" />
+ 
+    <ImageView
+        android:id="@+id/text_chat_icon"
+        android:contentDescription="@string/chatStr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/camera"
+        android:onClick="onClickTextChat" />
+ 
+</RelativeLayout>
