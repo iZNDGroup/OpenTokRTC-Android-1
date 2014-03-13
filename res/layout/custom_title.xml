@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
     android:id="@+id/title_bar"
     android:layout_width="fill_parent" 
-    android:layout_height="wrap_content"
+    android:layout_height="50dip"
     android:orientation="horizontal"
     android:background="#000000"
    >
@@ -15,22 +15,24 @@
         android:layout_alignParentLeft="true"
         android:src="@drawable/ic_launcher" />
 
-    <TextView android:id="@+id/title"
+    <TextView
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/icon"
+        android:text="@string/app_name"
         android:textColor="#fff"
-        android:textSize="20sp"
-        android:text="@string/app_name" />
- 
+        android:textSize="20sp" />
+
     <ImageView
         android:id="@+id/text_chat_icon"
-        android:contentDescription="@string/chatStr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:src="@drawable/camera"
-        android:onClick="onClickTextChat" />
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/chatStr"
+        android:onClick="onClickTextChat"
+        android:src="@drawable/text_chat" />
  
 </RelativeLayout>
