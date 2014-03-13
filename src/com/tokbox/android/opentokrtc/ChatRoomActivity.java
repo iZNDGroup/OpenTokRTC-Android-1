@@ -13,10 +13,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import com.opentok.android.OpenTokConfig;
+
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -52,6 +58,8 @@ public class ChatRoomActivity extends Activity implements
 
 	protected Handler mHandler = new Handler();
 
+	private NotificationCompat.Builder mNotifyBuilder;
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -71,7 +79,14 @@ public class ChatRoomActivity extends Activity implements
 				R.layout.custom_title);
 
 		mMessageBox = (RelativeLayout) findViewById(R.id.messagebox);
-		mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
+
+		Uri url = getIntent().getData();
+        if(url == null) {
+            mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
+        } else {
+            mRoomName = url.getPathSegments().get(0);
+        }
+
 		mMessageEditText = (EditText) findViewById(R.id.message);
 
 		mPreview = (ViewGroup) findViewById(R.id.publisherview);
@@ -94,6 +109,17 @@ public class ChatRoomActivity extends Activity implements
 		if (mRoom != null) {
 			mRoom.onPause();
 		}
+		mNotifyBuilder = new NotificationCompat.Builder(this)
+        .setContentTitle("OpenTokRTC")
+        .setContentText("Ongoing call")
+        .setSmallIcon(R.drawable.ic_launcher).setOngoing(true);
+        
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        
+        mNotificationManager.notify(
+                1,
+                mNotifyBuilder.build());
 	}
 
 	@Override
@@ -103,23 +129,31 @@ public class ChatRoomActivity extends Activity implements
 		if (mRoom != null) {
 			mRoom.onResume();
 		}
+		NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        
+        mNotificationManager.cancel(1);
+
+        if (mRoom != null) {
+        	mRoom.onResume();
+        }
+
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 
-		if (mRoom != null) {
-			mRoom.disconnect();
-		}
-		finish();
+		if(this.isFinishing()) {
+            if (mRoom != null) {
+            	mRoom.disconnect();
+            }
+        }
 	}
 
 	private void initializeRoom() {
 		Log.i(LOGTAG, "initializing chat room fragment for room: " + mRoomName);
 		setTitle(mRoomName);
-		GetRoomDataTask task = new GetRoomDataTask();
-		task.execute(mRoomName);
 
 		// show connecting dialog
 		mConnectingDialog = new ProgressDialog(this);
@@ -128,6 +162,9 @@ public class ChatRoomActivity extends Activity implements
 		mConnectingDialog.setCancelable(false);
 		mConnectingDialog.setIndeterminate(true);
 		mConnectingDialog.show();
+
+		GetRoomDataTask task = new GetRoomDataTask();
+		task.execute(mRoomName);
 	}
 
 	private class GetRoomDataTask extends AsyncTask<String, Void, Room> {

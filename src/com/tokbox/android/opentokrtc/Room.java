@@ -1,17 +1,20 @@
 package com.tokbox.android.opentokrtc;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
-import com.opentok.android.BaseVideoRenderer;
-import com.opentok.android.Connection;
-import com.opentok.android.Publisher;
-import com.opentok.android.Session;
-import com.opentok.android.Stream;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
+import android.opengl.GLSurfaceView;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -20,15 +23,24 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.opentok.android.BaseVideoRenderer;
+import com.opentok.android.Connection;
+import com.opentok.android.Publisher;
+import com.opentok.android.Session;
+import com.opentok.android.Stream;
+
 public class Room extends Session {
+    public static final String TAG = "Room";
 
 	Context mContext;
 	String apikey;
 	String sessionId;
 	String token;
 	
+	String mPublisherName = "name";
+	
 	// Interface
-	ViewPager mPlayersViewCotainer;
+	ViewPager mParticipantsViewContainer;
 	ViewGroup mPreview;
 	TextView mMessageView;
 	ScrollView mMessageScroll;
@@ -38,9 +50,9 @@ public class Room extends Session {
 	protected Participant mCurrentParticipant;
 
 	// Players status
-	ArrayList<Participant> mPlayers = new ArrayList<Participant>();
-	HashMap<Stream, Participant> mPlayerStream = new HashMap<Stream, Participant>();
-	HashMap<String, Participant> mPlayerConnection = new HashMap<String, Participant>();
+	ArrayList<Participant> mParticipants = new ArrayList<Participant>();
+	HashMap<Stream, Participant> mParticipantStream = new HashMap<Stream, Participant>();
+	HashMap<String, Participant> mParticipantConnection = new HashMap<String, Participant>();
 
 	PagerAdapter mPagerAdapter = new PagerAdapter() {
 
@@ -51,13 +63,13 @@ public class Room extends Session {
 
 		@Override
 		public int getCount() {
-			return mPlayers.size();
+			return mParticipants.size();
 		}
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			if (position < mPlayers.size()) {
-				return mPlayers.get(position).getName();
+			if (position < mParticipants.size()) {
+				return mParticipants.get(position).getName();
 			} else {
 				return null;
 			}
@@ -65,7 +77,7 @@ public class Room extends Session {
 
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
-			Participant p = mPlayers.get(position);
+			Participant p = mParticipants.get(position);
 			container.addView(p.getView());
 			return p;
 		}
@@ -73,7 +85,7 @@ public class Room extends Session {
 		@Override
 		public void setPrimaryItem(ViewGroup container, int position,
 				Object object) {
-			for (Participant p : mPlayers) {
+			for (Participant p : mParticipants) {
 				if (p == object) {
 					mCurrentParticipant = p;
 					if (!p.getSubscribeToVideo()) {
@@ -95,8 +107,8 @@ public class Room extends Session {
 
 		@Override
 		public int getItemPosition(Object object) {
-			for (int i = 0; i < mPlayers.size(); i++) {
-				if (mPlayers.get(i) == object) {
+			for (int i = 0; i < mParticipants.size(); i++) {
+				if (mParticipants.get(i) == object) {
 					return i;
 				}
 			}
@@ -114,10 +126,9 @@ public class Room extends Session {
 	}
 
 	// public methods
-	public void setPlayersViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
-		this.mPlayersViewCotainer = container;
-		this.mPlayersViewCotainer.setAdapter(mPagerAdapter);
-		this.onSubscriberUIClick = onSubscriberUIClick;
+	public void setPlayersViewContainer(ViewPager container) {
+		this.mParticipantsViewContainer = container;
+		this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
 		mPagerAdapter.notifyDataSetChanged();
 	}
 
@@ -135,24 +146,52 @@ public class Room extends Session {
 	}
 
 	public void sendChatMessage(String message) {
-		sendSignal("chat", message);
-		presentMessage("Me", message);
+	    JSONObject json = new JSONObject();
+	    try {
+            json.put("name", mPublisherName);
+            json.put("text", message);
+            sendSignal("chat", json.toString());
+            presentMessage("Me", message);
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }	    
 	}
 
 	// callbacks
 	@Override
 	protected void onConnected(Session session) {
-		mPublisher = new Publisher(mContext, null, "MyPlayer");
-		publish(mPublisher);
+		Publisher p = new Publisher(mContext, null, "Android");
+		publish(p);
 
 		// Add video preview
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-		mPreview.addView(mPublisher.getView(), lp);
-		mPublisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
+		View v = p.getView();
+		//v.setZOrderOnTop(true);
+		try {
+            Method method = v.getClass().getMethod("setZOrderOnTop", Boolean.class);
+            method.invoke(v, Boolean.valueOf(true));
+        } catch (NoSuchMethodException e) {   
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+		
+        
+		mPreview.addView(v, lp);
+		p.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
 				BaseVideoRenderer.STYLE_VIDEO_FILL);
 
-		presentText("Welcome to OpenTok Chat.");
+		presentText("Welcome to OpenTokRTC by TokBox.");
 	}
 
 	@Override
@@ -163,7 +202,7 @@ public class Room extends Session {
 		p.setUserId(stream.getConnection().getData());
 
 		// Subscribe audio only if we have more than one player
-		if (mPlayers.size() != 0) {
+		if (mParticipants.size() != 0) {
 			p.setSubscribeToVideo(false);
 		}
 
@@ -172,9 +211,9 @@ public class Room extends Session {
 		// Subscribe to this player
 		this.subscribe(p);
 
-		mPlayers.add(p);
-		mPlayerStream.put(stream, p);
-		mPlayerConnection.put(stream.getConnection().getConnectionId(), p);
+		mParticipants.add(p);
+		mParticipantStream.put(stream, p);
+		mParticipantConnection.put(stream.getConnection().getConnectionId(), p);
 		mPagerAdapter.notifyDataSetChanged();
 
 		presentText("\n" + p.getName() + " has joined the chat");
@@ -182,11 +221,11 @@ public class Room extends Session {
 
 	@Override
 	protected void onDroppedStream(Session session, Stream stream) {
-		Participant p = mPlayerStream.get(stream);
+		Participant p = mParticipantStream.get(stream);
 		if (p != null) {
-			mPlayers.remove(p);
-			mPlayerStream.remove(stream);
-			mPlayerConnection.remove(stream.getConnection().getConnectionId());
+			mParticipants.remove(p);
+			mParticipantStream.remove(stream);
+			mParticipantConnection.remove(stream.getConnection().getConnectionId());
 			mPagerAdapter.notifyDataSetChanged();
 
 			presentText("\n" + p.getName() + " has left the chat");
@@ -196,13 +235,61 @@ public class Room extends Session {
 	@Override
 	protected void onSignal(Session session, String type, String data,
 			Connection connection) {
+	    Log.d(TAG, "Received signal:" + type + " data:" + data);
         String mycid = this.getConnection().getConnectionId();
         String cid = connection.getConnectionId();
         if (!cid.equals(mycid)) {
             if ("chat".equals(type)) {
-                Participant p = mPlayerConnection.get(cid);
+                // Text message
+                Participant p = mParticipantConnection.get(cid);
                 if (p != null) {
-                    presentMessage(p.getName(), data);
+                    JSONObject json;
+                    try {
+                        json = new JSONObject(data);
+                        String text = json.getString("text");
+                        String name = json.getString("name");
+                        p.setName(name);
+                        presentMessage(p.getName(), text);
+                    } catch (JSONException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            } else if("name".equals(type)) {
+                // Name change message
+                Participant p = mParticipantConnection.get(cid);
+                if (p != null) {
+                    try {
+                        String oldName = p.getName();
+                        JSONArray jsonArray = new JSONArray(data);
+                        String name = jsonArray.getString(1);
+                        p.setName(name);
+                        presentText("\n" + oldName + " is now known as " + name);
+                    } catch (JSONException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            } else if("initialize".equals(type)) {
+                // Initialize message
+                try {
+                    JSONObject json = new JSONObject(data);
+                    JSONObject users = json.getJSONObject("users");
+                    Iterator<String> it = users.keys();
+                    while(it.hasNext()) {
+                        String pcid = it.next();
+                        Participant p = mParticipantConnection.get(pcid);
+                        if (p != null) {
+                            p.setName(users.getString(pcid));
+                        }
+                    }
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                Participant p = mParticipantConnection.get(cid);
+                if (p != null) {
                 }
             }
         }
