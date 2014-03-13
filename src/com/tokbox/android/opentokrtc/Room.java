@@ -14,6 +14,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
@@ -31,6 +32,10 @@ public class Room extends Session {
 	ViewGroup mPreview;
 	TextView mMessageView;
 	ScrollView mMessageScroll;
+	OnClickListener onSubscriberUIClick;
+	
+	protected Publisher mPublisher;
+	protected Participant mCurrentParticipant;
 
 	// Players status
 	ArrayList<Participant> mPlayers = new ArrayList<Participant>();
@@ -70,6 +75,7 @@ public class Room extends Session {
 				Object object) {
 			for (Participant p : mPlayers) {
 				if (p == object) {
+					mCurrentParticipant = p;
 					if (!p.getSubscribeToVideo()) {
 						p.setSubscribeToVideo(true);
 					}
@@ -108,9 +114,10 @@ public class Room extends Session {
 	}
 
 	// public methods
-	public void setPlayersViewContainer(ViewPager container) {
+	public void setPlayersViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
 		this.mPlayersViewCotainer = container;
 		this.mPlayersViewCotainer.setAdapter(mPagerAdapter);
+		this.onSubscriberUIClick = onSubscriberUIClick;
 		mPagerAdapter.notifyDataSetChanged();
 	}
 
@@ -135,14 +142,14 @@ public class Room extends Session {
 	// callbacks
 	@Override
 	protected void onConnected(Session session) {
-		Publisher p = new Publisher(mContext, null, "MyPlayer");
-		publish(p);
+		mPublisher = new Publisher(mContext, null, "MyPlayer");
+		publish(mPublisher);
 
 		// Add video preview
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-		mPreview.addView(p.getView(), lp);
-		p.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
+		mPreview.addView(mPublisher.getView(), lp);
+		mPublisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
 				BaseVideoRenderer.STYLE_VIDEO_FILL);
 
 		presentText("Welcome to OpenTok Chat.");
@@ -160,6 +167,8 @@ public class Room extends Session {
 			p.setSubscribeToVideo(false);
 		}
 
+		p.getView().setOnClickListener(this.onSubscriberUIClick);
+		
 		// Subscribe to this player
 		this.subscribe(p);
 
@@ -213,4 +222,14 @@ public class Room extends Session {
 			}
 		});
 	}
+	
+	public Publisher getmPublisher() {
+		return mPublisher;
+	}
+
+	public Participant getmCurrentParticipant() {
+		return mCurrentParticipant;
+	}
+
+
 }

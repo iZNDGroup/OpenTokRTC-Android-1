@@ -12,7 +12,9 @@
     <string name="endCall1">End call</string>
     <string name="endCall2">End</string>
     <string name="audioOnly">Audio only</string>
-    <string name="send">Send</string>
+    <string name="send">send</string>
+    <string name="chatStr">Text chat</string>
+    
     
     <color name="grey">#363636</color>
     <color name="transparent_grey">#80282828</color>

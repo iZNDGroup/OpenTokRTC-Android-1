@@ -22,15 +22,16 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="OpenTokRTC"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.tokbox.android.opentokrtc.ChatRoomActivity"/>
+            android:name="com.tokbox.android.opentokrtc.ChatRoomActivity"
+            android:theme="@style/ActivityTheme" />
     	</application>
 
 </manifest>

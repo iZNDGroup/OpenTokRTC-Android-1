@@ -1,10 +1,15 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="ActivityTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:windowActionBar">false</item>
+     </style>
+    
     <style name="AppTheme.TitleText" parent="android:TextAppearance.Large">
         <item name="android:gravity">center</item>
         <item name="android:textColor">#fff</item>

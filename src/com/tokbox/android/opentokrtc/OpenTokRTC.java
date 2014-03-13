@@ -16,7 +16,7 @@ public class OpenTokRTC extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.main); 
     }
 
     public void joinRoom(View v) {
@@ -28,8 +28,7 @@ public class OpenTokRTC extends Activity
         Intent enterChatRoomIntent = new Intent(this, ChatRoomActivity.class);
         enterChatRoomIntent.putExtra(ChatRoomActivity.ARG_ROOM_ID, roomName);
         startActivity(enterChatRoomIntent);
-  
-      
+
     }
 
 }

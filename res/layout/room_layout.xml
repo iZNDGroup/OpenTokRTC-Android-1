@@ -13,19 +13,46 @@
         android:layout_weight="0.50"
         android:background="#000000" >
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
+        <RelativeLayout
+            android:id="@+id/fragment_sub_container"
             android:layout_width="fill_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/transparent_grey" >
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/subscriberView"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_below= "@+id/fragment_sub_container" 
+			android:layout_above= "@+id/fragment_pub_port_container">
+            
+            <android.support.v4.view.ViewPager
+                android:id="@+id/pager"
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/publisherview"
             android:layout_width="120dp"
             android:layout_height="160dp"
-            android:layout_alignParentBottom="true"
+            android:layout_above="@+id/fragment_pub_port_container"
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/publisher" />
+            android:background="@drawable/publisher"
+         />
+
+        <RelativeLayout
+            android:id="@+id/fragment_pub_port_container"
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/transparent_grey" >
+        </RelativeLayout>
     </RelativeLayout>
 
     <RelativeLayout
@@ -35,7 +62,7 @@
         android:layout_weight="0.50"
         android:background="#FFFFFF"
         android:orientation="horizontal"
-       >
+        android:visibility="gone" >
 
         <ScrollView
             android:id="@+id/scroller"
@@ -60,7 +87,8 @@
             android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
-            android:layout_toLeftOf="@+id/sendMessageButton" />
+            android:layout_toLeftOf="@+id/sendMessageButton"
+          />
 
         <Button
             android:id="@+id/sendMessageButton"
