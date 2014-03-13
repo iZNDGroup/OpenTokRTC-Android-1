@@ -14,8 +14,8 @@
         android:layout_height="48dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="@color/transparent_grey" >
-
+        android:background="@color/transparent_grey"
+        >
         <View
             android:id="@+id/line1"
             android:layout_width="match_parent"

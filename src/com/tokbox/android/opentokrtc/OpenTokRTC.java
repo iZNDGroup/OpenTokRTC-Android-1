@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 public class OpenTokRTC extends Activity
@@ -16,6 +17,9 @@ public class OpenTokRTC extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.main); 
     }
 
@@ -28,7 +32,6 @@ public class OpenTokRTC extends Activity
         Intent enterChatRoomIntent = new Intent(this, ChatRoomActivity.class);
         enterChatRoomIntent.putExtra(ChatRoomActivity.ARG_ROOM_ID, roomName);
         startActivity(enterChatRoomIntent);
-
     }
 
 }
