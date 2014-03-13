@@ -8,7 +8,8 @@
     <style name="ActivityTheme" parent="android:Theme.Holo.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="android:windowActionBar">false</item>
-     </style>
+        <item name="android:windowTitleSize">50dip</item>
+      </style>
     
     <style name="AppTheme.TitleText" parent="android:TextAppearance.Large">
         <item name="android:gravity">center</item>
