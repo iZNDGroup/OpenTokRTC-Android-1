@@ -36,50 +36,60 @@ public final class R {
         public static final int logo=0x7f020005;
         public static final int mute=0x7f020006;
         public static final int publisher=0x7f020007;
-        public static final int textfield_activated_holo_light=0x7f020008;
-        public static final int textfield_default_holo_light=0x7f020009;
-        public static final int textfield_disabled_focused_holo_light=0x7f02000a;
-        public static final int textfield_disabled_holo_light=0x7f02000b;
-        public static final int textfield_focused_holo_light=0x7f02000c;
-        public static final int unmute=0x7f02000d;
+        public static final int text_chat=0x7f020008;
+        public static final int textfield_activated_holo_light=0x7f020009;
+        public static final int textfield_default_holo_light=0x7f02000a;
+        public static final int textfield_disabled_focused_holo_light=0x7f02000b;
+        public static final int textfield_disabled_holo_light=0x7f02000c;
+        public static final int textfield_focused_holo_light=0x7f02000d;
+        public static final int unmute=0x7f02000e;
     }
     public static final class id {
-        public static final int button_join_room=0x7f08000e;
-        public static final int endCall=0x7f080004;
-        public static final int imageView1=0x7f080008;
-        public static final int inputArea=0x7f08000c;
-        public static final int input_room_name=0x7f08000d;
-        public static final int introText=0x7f08000f;
-        public static final int layoutPubFragment=0x7f080000;
-        public static final int layoutSubFragment=0x7f080005;
-        public static final int line1=0x7f080007;
-        public static final int line2=0x7f08000b;
-        public static final int mainlayout=0x7f080010;
-        public static final int message=0x7f080015;
-        public static final int messageView=0x7f080016;
-        public static final int messagebox=0x7f080013;
-        public static final int mutePublisher=0x7f080002;
-        public static final int muteSubscriber=0x7f080009;
-        public static final int pager=0x7f080011;
-        public static final int publisherview=0x7f080012;
-        public static final int publisherwidget=0x7f080001;
-        public static final int scroller=0x7f080014;
-        public static final int sendMessageButton=0x7f080017;
-        public static final int subscriberName=0x7f08000a;
-        public static final int subscriberwidget=0x7f080006;
-        public static final int swapCamera=0x7f080003;
+        public static final int button_join_room=0x7f080012;
+        public static final int endCall=0x7f080008;
+        public static final int fragment_pub_container=0x7f080017;
+        public static final int fragment_sub_container=0x7f080015;
+        public static final int icon=0x7f080001;
+        public static final int imageView1=0x7f08000c;
+        public static final int inputArea=0x7f080010;
+        public static final int input_room_name=0x7f080011;
+        public static final int introText=0x7f080013;
+        public static final int layoutPubFragment=0x7f080004;
+        public static final int layoutSubFragment=0x7f080009;
+        public static final int line1=0x7f08000b;
+        public static final int line2=0x7f08000f;
+        public static final int mainlayout=0x7f080014;
+        public static final int message=0x7f08001c;
+        public static final int messageView=0x7f08001d;
+        public static final int messagebox=0x7f08001a;
+        public static final int mutePublisher=0x7f080006;
+        public static final int muteSubscriber=0x7f08000d;
+        public static final int pager=0x7f080018;
+        public static final int publisherview=0x7f080019;
+        public static final int publisherwidget=0x7f080005;
+        public static final int scroller=0x7f08001b;
+        public static final int sendMessageButton=0x7f08001e;
+        public static final int subscriberName=0x7f08000e;
+        public static final int subscriberView=0x7f080016;
+        public static final int subscriberwidget=0x7f08000a;
+        public static final int swapCamera=0x7f080007;
+        public static final int text_chat_icon=0x7f080003;
+        public static final int title=0x7f080002;
+        public static final int title_bar=0x7f080000;
     }
     public static final class layout {
-        public static final int layout_fragment_pub_control=0x7f030000;
-        public static final int layout_fragment_sub_control=0x7f030001;
-        public static final int main=0x7f030002;
-        public static final int room_layout=0x7f030003;
+        public static final int custom_title=0x7f030000;
+        public static final int layout_fragment_pub_control=0x7f030001;
+        public static final int layout_fragment_sub_control=0x7f030002;
+        public static final int main=0x7f030003;
+        public static final int room_layout=0x7f030004;
     }
     public static final class string {
         public static final int action_settings=0x7f050001;
         public static final int app_name=0x7f050000;
         public static final int audioOnly=0x7f050009;
         public static final int button_join_room=0x7f050004;
+        public static final int chatStr=0x7f05000b;
         public static final int endCall1=0x7f050007;
         public static final int endCall2=0x7f050008;
         public static final int input_room_name_hint=0x7f050003;
@@ -89,11 +99,12 @@ public final class R {
         public static final int swapStr=0x7f050006;
     }
     public static final class style {
+        public static final int ActivityTheme=0x7f070001;
         /**  Base application theme. 
  Customize your theme here. 
          */
         public static final int AppTheme=0x7f070000;
-        public static final int AppTheme_RoomSelectionArea=0x7f070002;
-        public static final int AppTheme_TitleText=0x7f070001;
+        public static final int AppTheme_RoomSelectionArea=0x7f070003;
+        public static final int AppTheme_TitleText=0x7f070002;
     }
 }

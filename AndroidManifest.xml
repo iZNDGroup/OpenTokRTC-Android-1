@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="16"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -22,16 +22,23 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="OpenTokRTC"
+            android:clearTaskOnLaunch="false"
+            android:configChanges="orientation"
             android:label="@string/app_name"
-            android:clearTaskOnLaunch="false" >
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.tokbox.android.opentokrtc.ChatRoomActivity"
-             android:clearTaskOnLaunch="false" android:launchMode="singleTask" 
-			 android:theme="@style/ActivityTheme" >
+        <activity
+            android:name="com.tokbox.android.opentokrtc.ChatRoomActivity"
+            android:clearTaskOnLaunch="false"
+            android:configChanges="orientation"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/ActivityTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

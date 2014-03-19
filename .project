@@ -3,6 +3,7 @@
 	<name>OpentokRTC</name>
 	<comment></comment>
 	<projects>
+		<project>opentok-android-sdk-webrtc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

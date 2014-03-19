@@ -16,6 +16,7 @@ public class Participant extends Subscriber {
         super(context, stream);
         // With the userId we can query our own database
         // to extract player information
+        // this.name = "Guest-" + (this.myConnectionId.substring(this.myConnectionId.length - 8, this.myConnectionId.length));
         setName("User" + ((int)(Math.random()*1000)));
         this.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
     }

@@ -11,13 +11,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.opengl.GLSurfaceView;
+import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
@@ -118,19 +119,21 @@ public class Room extends Session {
 	};
 
 	public Room(Context context, String roomName, String sessionId, String token, String apiKey) {
-		super(context, sessionId, null);
+		super(context, apiKey, sessionId, null);
 		this.apikey = apiKey;
 		this.sessionId = sessionId;
 		this.token = token;
 		this.mContext = context;
+		this.mHandler = new Handler(context.getMainLooper());
 	}
 
 	// public methods
-	public void setPlayersViewContainer(ViewPager container) {
-		this.mParticipantsViewContainer = container;
-		this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
-		mPagerAdapter.notifyDataSetChanged();
-	}
+	public void setPlayersViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
+        this.mParticipantsViewContainer = container;
+        this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
+        this.onSubscriberUIClick = onSubscriberUIClick;
+        mPagerAdapter.notifyDataSetChanged();
+    }
 
 	public void setMessageView(TextView et, ScrollView scroller) {
 		this.mMessageView = et;
@@ -142,7 +145,7 @@ public class Room extends Session {
 	}
 
 	public void connect() {
-		this.connect(apikey, token);
+		this.connect(token);
 	}
 
 	public void sendChatMessage(String message) {
@@ -162,30 +165,14 @@ public class Room extends Session {
 	@Override
 	protected void onConnected(Session session) {
 		Publisher p = new Publisher(mContext, null, "Android");
+		mPublisher = p;
 		publish(p);
 
 		// Add video preview
 		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-		View v = p.getView();
-		//v.setZOrderOnTop(true);
-		try {
-            Method method = v.getClass().getMethod("setZOrderOnTop", Boolean.class);
-            method.invoke(v, Boolean.valueOf(true));
-        } catch (NoSuchMethodException e) {   
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-		
+		SurfaceView v = (SurfaceView)p.getView();
+		v.setZOrderOnTop(true);
         
 		mPreview.addView(v, lp);
 		p.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
@@ -318,5 +305,32 @@ public class Room extends Session {
 		return mCurrentParticipant;
 	}
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mPublisher != null) {
+            mPreview.setVisibility(View.GONE);
+        }
+    }
 
+    Handler mHandler;
+    @Override
+    public void onResume() {
+        super.onResume();
+        mHandler.postDelayed(new Runnable() {
+            
+            @Override
+            public void run() {
+                if(mPublisher != null) {
+                    mPreview.setVisibility(View.VISIBLE);
+                    mPreview.removeView(mPublisher.getView());
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                    mPreview.addView(mPublisher.getView(), lp);
+                }
+            }
+        }, 500);
+    }
+
+	
 }

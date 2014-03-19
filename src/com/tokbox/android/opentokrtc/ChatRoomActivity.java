@@ -13,35 +13,38 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
-import com.opentok.android.OpenTokConfig;
-
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.os.Handler;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.opentok.android.OpenTokConfig;
+
 public class ChatRoomActivity extends Activity implements
 		SubscriberControlFragment.SubscriberCallbacks,
 		PublisherControlFragment.PublisherCallbacks {
 
-	public static final String LOGTAG = "ChatRoomActivity";
+	private static final int NOTIFICATION_ID = 1;
+    public static final String LOGTAG = "ChatRoomActivity";
 	public static final String ARG_ROOM_ID = "roomId";
 	private String mRoomName;
 	private ProgressDialog mConnectingDialog;
@@ -62,6 +65,7 @@ public class ChatRoomActivity extends Activity implements
 	protected Handler mHandler = new Handler();
 
 	private NotificationCompat.Builder mNotifyBuilder;
+	NotificationManager mNotificationManager;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -105,6 +109,14 @@ public class ChatRoomActivity extends Activity implements
 			initPublisherFragment();
 		}
 
+        mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        
+        //enable OTKit logs
+        OpenTokConfig.setOTKitLogs(true);
+        //enable bindings logs
+        OpenTokConfig.setJNILogs(true);
+		
 		initializeRoom();
 
 	}
@@ -121,11 +133,15 @@ public class ChatRoomActivity extends Activity implements
         .setContentText("Ongoing call")
         .setSmallIcon(R.drawable.ic_launcher).setOngoing(true);
         
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        
+		Intent notificationIntent = new Intent(this, ChatRoomActivity.class);
+	    notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	    notificationIntent.putExtra(ChatRoomActivity.ARG_ROOM_ID, mRoomName);
+	    PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+	    
+	    mNotifyBuilder.setContentIntent(intent);
+		
         mNotificationManager.notify(
-                1,
+                NOTIFICATION_ID,
                 mNotifyBuilder.build());
 	}
 
@@ -136,10 +152,8 @@ public class ChatRoomActivity extends Activity implements
 		if (mRoom != null) {
 			mRoom.onResume();
 		}
-		NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        
-        mNotificationManager.cancel(1);
+
+		mNotificationManager.cancel(NOTIFICATION_ID);
 
         if (mRoom != null) {
         	mRoom.onResume();
@@ -152,6 +166,8 @@ public class ChatRoomActivity extends Activity implements
 		super.onStop();
 
 		if(this.isFinishing()) {
+	        mNotificationManager.cancel(NOTIFICATION_ID);
+	        
             if (mRoom != null) {
             	mRoom.disconnect();
             }
@@ -362,6 +378,8 @@ public class ChatRoomActivity extends Activity implements
 			Log.i(LOGTAG, "onClick subscriber UI");
 			mSubscriberFragment.subscriberClick();
 			showSubFragment();
+            mPublisherFragment.publisherClick();
+            showPubFragment();
 		}
 	};
 
@@ -369,6 +387,8 @@ public class ChatRoomActivity extends Activity implements
 		@Override
 		public void onClick(View v) {
 			Log.i(LOGTAG, "onClick publisher UI");
+            mSubscriberFragment.subscriberClick();
+            showSubFragment();
 			mPublisherFragment.publisherClick();
 			showPubFragment();
 		}
