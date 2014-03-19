@@ -387,11 +387,15 @@ public class ChatRoomActivity extends Activity implements
 		@Override
 		public void onClick(View v) {
 			Log.i(LOGTAG, "onClick publisher UI");
-            mSubscriberFragment.subscriberClick();
-            showSubFragment();
-			mPublisherFragment.publisherClick();
-			showPubFragment();
-		}
+            if	(mRoom.getmCurrentParticipant()!= null) {
+            	mSubscriberFragment.subscriberClick();
+            	showSubFragment();
+            }
+            if (mRoom.getmPublisher() != null) {
+            	mPublisherFragment.publisherClick();
+            	showPubFragment();
+            }
+        }
 	};
 	
 	@Override
