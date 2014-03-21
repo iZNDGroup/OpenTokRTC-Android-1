@@ -1,7 +1,5 @@
 package com.tokbox.android.opentokrtc;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,13 +47,14 @@ public class Room extends Session {
 	
 	protected Publisher mPublisher;
 	protected Participant mCurrentParticipant;
+	protected int mCurrentPosition;
 
 	// Players status
-	ArrayList<Participant> mParticipants = new ArrayList<Participant>();
+	protected ArrayList<Participant> mParticipants = new ArrayList<Participant>();
 	HashMap<Stream, Participant> mParticipantStream = new HashMap<Stream, Participant>();
 	HashMap<String, Participant> mParticipantConnection = new HashMap<String, Participant>();
 
-	PagerAdapter mPagerAdapter = new PagerAdapter() {
+	protected PagerAdapter mPagerAdapter = new PagerAdapter() {
 
 		@Override
 		public boolean isViewFromObject(View arg0, Object arg1) {
@@ -305,6 +304,18 @@ public class Room extends Session {
 		return mCurrentParticipant;
 	}
 
+	public ArrayList<Participant> getmParticipants() {
+		return mParticipants;
+	}
+
+	public PagerAdapter getmPagerAdapter() {
+		return mPagerAdapter;
+	}
+
+	public int getmCurrentPosition() {
+		return mCurrentPosition;
+	}
+	
     @Override
     public void onPause() {
         super.onPause();
@@ -331,6 +342,5 @@ public class Room extends Session {
             }
         }, 500);
     }
-
 	
 }

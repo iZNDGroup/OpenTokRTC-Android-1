@@ -28,10 +28,12 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
@@ -53,7 +55,8 @@ public class ChatRoomActivity extends Activity implements
 	private ViewPager mPlayersView;
 	protected Room mRoom;
 	private boolean mSubscriberVideoOnly = false;
-
+	private ImageView leftArrowImage;
+	private ImageView rightArrowImage;	
 	private RelativeLayout mMessageBox;
 	private RelativeLayout fragmentPubContainer;
 	private RelativeLayout fragmentSubContainer;
@@ -100,7 +103,9 @@ public class ChatRoomActivity extends Activity implements
 		mPreview = (ViewGroup) findViewById(R.id.publisherview);
 
 		mPlayersView = (ViewPager) findViewById(R.id.pager);
-
+		leftArrowImage = (ImageView) findViewById(R.id.left_arrow);
+		rightArrowImage = (ImageView) findViewById(R.id.right_arrow);
+		
 		fragmentPubContainer = (RelativeLayout) findViewById(R.id.fragment_pub_container);
 		fragmentSubContainer  = (RelativeLayout) findViewById(R.id.fragment_sub_container);
 		
@@ -113,9 +118,9 @@ public class ChatRoomActivity extends Activity implements
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         
         //enable OTKit logs
-        OpenTokConfig.setOTKitLogs(true);
+       // OpenTokConfig.setOTKitLogs(true);
         //enable bindings logs
-        OpenTokConfig.setJNILogs(true);
+       // OpenTokConfig.setJNILogs(true);
 		
 		initializeRoom();
 
@@ -380,6 +385,18 @@ public class ChatRoomActivity extends Activity implements
 			showSubFragment();
             mPublisherFragment.publisherClick();
             showPubFragment();
+            
+            //show subscriber views arrows
+            if (mRoom.getmParticipants().size() > 1 ) {
+            	if (leftArrowImage.getVisibility() == View.GONE) {
+            		leftArrowImage.setVisibility(View.VISIBLE);
+            		rightArrowImage.setVisibility(View.VISIBLE);
+            	}
+            	else {
+            		leftArrowImage.setVisibility(View.GONE);
+            		rightArrowImage.setVisibility(View.GONE);
+            	}
+            }
 		}
 	};
 
@@ -435,6 +452,16 @@ public class ChatRoomActivity extends Activity implements
 			fragmentSubContainer.setVisibility(View.GONE);
 		}
 	}
+	public void nextParticipant(View view) {
+		int nextPosition = mRoom.getmCurrentPosition() +1;
+		mPlayersView.setCurrentItem(nextPosition);
+	}
+	
+	public void lastParticipant(View view) {
+		int nextPosition = mRoom.getmCurrentPosition() -1;
+		mPlayersView.setCurrentItem(nextPosition);
+	}
+	
 	
 	/**
      * Converts dp to real pixels, according to the screen density.
@@ -445,5 +472,4 @@ public class ChatRoomActivity extends Activity implements
         double screenDensity = this.getResources().getDisplayMetrics().density;
         return (int) (screenDensity * (double) dp);
     }
-
 }
