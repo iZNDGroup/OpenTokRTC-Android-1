@@ -20,7 +20,7 @@ public class OpenTokRTC extends Activity
         
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.main); 
+        setContentView(R.layout.main_layout); 
     }
 
     public void joinRoom(View v) {

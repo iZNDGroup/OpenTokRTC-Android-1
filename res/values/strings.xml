@@ -14,15 +14,6 @@
     <string name="audioOnly">Audio only</string>
     <string name="send">send</string>
     <string name="chatStr">Text chat</string>
-    
-    
-    <color name="grey">#363636</color>
-    <color name="transparent_grey">#80282828</color>
-    <color name="grey2">#282828</color>
-    <color name="white">#ffffff</color>
-    <color name="trans_white">#20ffffff</color>
-    <color name="trans">#00000000</color>
-    <color name="blue">#cc33b5e5</color>
-    
+     
 
 </resources>

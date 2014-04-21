@@ -28,7 +28,6 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AlphaAnimation;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -62,8 +61,8 @@ public class ChatRoomActivity extends Activity implements
 	private RelativeLayout fragmentSubContainer;
 	
 	// Fragments
-	private SubscriberControlFragment mSubscriberFragment;
-	private PublisherControlFragment mPublisherFragment;
+	protected SubscriberControlFragment mSubscriberFragment;
+	protected PublisherControlFragment mPublisherFragment;
 
 	protected Handler mHandler = new Handler();
 
@@ -72,9 +71,6 @@ public class ChatRoomActivity extends Activity implements
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		// Show the Up button in the action bar.
-		// getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -113,7 +109,7 @@ public class ChatRoomActivity extends Activity implements
 			initSubscriberFragment();
 			initPublisherFragment();
 		}
-
+	      
         mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         
@@ -121,9 +117,8 @@ public class ChatRoomActivity extends Activity implements
        // OpenTokConfig.setOTKitLogs(true);
         //enable bindings logs
        // OpenTokConfig.setJNILogs(true);
-		
+         
 		initializeRoom();
-
 	}
 
 	@Override
@@ -298,34 +293,12 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 
-	public void loadInterface() {
-
-		// Surfaceview ordering hack for 2.3 devices
-		mHandler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
-					mSubscriberFragment.initSubscriberWidget();
-				}
-			}
-		}, 0);
-
-		// Show/hide UI controls
-		if (mSubscriberVideoOnly) {
-			if (mRoom.getmCurrentParticipant() != null) {
-				mRoom.getmCurrentParticipant().getView()
-						.setVisibility(View.GONE);
-			}
-			// findViewById(R.id.audioOnly1).setVisibility(View.VISIBLE);
-			// findViewById(R.id.audioOnly2).setVisibility(View.VISIBLE);
-		}
-	}
-
+	
 	public void initPublisherFragment() {
 		mPublisherFragment = new PublisherControlFragment();
 		getFragmentManager().beginTransaction()
 				.add(R.id.fragment_pub_container, mPublisherFragment)
-				.commit();
+				.commit();	
 	}
 
 	public void initSubscriberFragment() {
@@ -380,13 +353,13 @@ public class ChatRoomActivity extends Activity implements
 	private OnClickListener onSubscriberUIClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			Log.i(LOGTAG, "onClick subscriber UI");
 			mSubscriberFragment.subscriberClick();
 			showSubFragment();
-            mPublisherFragment.publisherClick();
-            showPubFragment();
-            
-            //show subscriber views arrows
+			
+			mPublisherFragment.publisherClick();
+			showPubFragment();
+			
+			//show subscriber views arrows
             if (mRoom.getmParticipants().size() > 1 ) {
             	if (leftArrowImage.getVisibility() == View.GONE) {
             		leftArrowImage.setVisibility(View.VISIBLE);
@@ -403,8 +376,8 @@ public class ChatRoomActivity extends Activity implements
 	private OnClickListener onPublisherUIClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			Log.i(LOGTAG, "onClick publisher UI");
-            if	(mRoom.getmCurrentParticipant()!= null) {
+			if	(mRoom.getmCurrentParticipant()!= null) {
+				Log.i("****marinas", "participant");
             	mSubscriberFragment.subscriberClick();
             	showSubFragment();
             }
@@ -426,21 +399,21 @@ public class ChatRoomActivity extends Activity implements
 	
 	public void showPubFragment(){
 		
-		if (fragmentPubContainer.getVisibility() == View.GONE) {
-			Log.i(LOGTAG, "onClick VISIBLE");
+		if (mPublisherFragment.ismPublisherWidgetVisible()) {
 			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
 					.getLayoutParams();
-			params.bottomMargin = dpToPx(58);;
+			params.bottomMargin = dpToPx(68);
 			mPreview.setLayoutParams(params);
 			fragmentPubContainer.setVisibility(View.VISIBLE);
+			
 		} else {
+			
 			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
 					.getLayoutParams();
 			params.addRule(RelativeLayout.ALIGN_BOTTOM);
-			params.bottomMargin = dpToPx(10);
+			params.bottomMargin = dpToPx(20);
 			mPreview.setLayoutParams(params);
 			fragmentPubContainer.setVisibility(View.GONE);
-
 		}
 	}
 	
@@ -462,6 +435,9 @@ public class ChatRoomActivity extends Activity implements
 		mPlayersView.setCurrentItem(nextPosition);
 	}
 	
+	public PublisherControlFragment getmPublisherFragment() {
+		return mPublisherFragment;
+	}
 	
 	/**
      * Converts dp to real pixels, according to the screen density.

@@ -4,9 +4,7 @@
     android:id="@+id/layoutSubFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center_vertical|center_horizontal"
-    android:background="@color/grey2" 
-    tools:context=".OpenTokUI" >
+    android:layout_gravity="center_vertical|center_horizontal" >
     
      <RelativeLayout
         android:id="@+id/subscriberwidget"
@@ -14,7 +12,7 @@
         android:layout_height="48dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="@color/transparent_grey"
+        android:background="@color/trans_dark_grey"
         >
         <View
             android:id="@+id/line1"
@@ -30,7 +28,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:background="@drawable/button_background"
-            android:src="@drawable/mute" />
+            android:src="@drawable/unmute_sub" />
 
         <TextView
             android:id="@+id/subscriberName"

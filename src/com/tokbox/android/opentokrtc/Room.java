@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
@@ -25,11 +26,14 @@ import android.widget.TextView;
 import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.Connection;
 import com.opentok.android.Publisher;
+import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
 
 public class Room extends Session {
-    public static final String TAG = "Room";
+   
+
+	public static final String TAG = "Room";
 
 	Context mContext;
 	String apikey;
@@ -181,7 +185,7 @@ public class Room extends Session {
 	}
 
 	@Override
-	protected void onReceivedStream(Session session, Stream stream) {
+	protected void onStreamReceived(Session session, Stream stream) {
 		Participant p = new Participant(mContext, stream);
 	
 		// we can use connection data to obtain each user id
@@ -206,7 +210,7 @@ public class Room extends Session {
 	}
 
 	@Override
-	protected void onDroppedStream(Session session, Stream stream) {
+	protected void onStreamDropped(Session session, Stream stream) {
 		Participant p = mParticipantStream.get(stream);
 		if (p != null) {
 			mParticipants.remove(p);
@@ -219,7 +223,7 @@ public class Room extends Session {
 	}
 
 	@Override
-	protected void onSignal(Session session, String type, String data,
+	protected void onSignalReceived(Session session, String type, String data,
 			Connection connection) {
 	    Log.d(TAG, "Received signal:" + type + " data:" + data);
         String mycid = this.getConnection().getConnectionId();
@@ -343,4 +347,11 @@ public class Room extends Session {
         }, 500);
     }
 	
+    
+    @Override
+   	protected void onPublisherAdded(Session session, PublisherKit publisher) {
+    	ChatRoomActivity a = (ChatRoomActivity) this.mContext;
+    	a.getmPublisherFragment().showPublisherWidget(true);
+    	a.getmPublisherFragment().initPublisherUI();
+    }
 }

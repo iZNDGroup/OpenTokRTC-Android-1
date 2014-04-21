@@ -4,16 +4,15 @@
     android:id="@+id/layoutPubFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey2"
+    android:background="@color/grey"
     tools:context=".OpenTokUI" >
 
    <RelativeLayout
-        android:id="@+id/publisherwidget"
+        android:id="@+id/publisherWidget"
         android:layout_width="fill_parent"
         android:layout_height="48dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="@color/grey" >
+        android:layout_centerHorizontal="true">
 
         <ImageButton
             android:id="@+id/mutePublisher"
@@ -22,7 +21,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:background="@drawable/button_background"
-            android:src="@drawable/mute"
+            android:src="@drawable/mute_pub"
             android:onClick="onMutePublisher" />
 
         <ImageButton
@@ -61,5 +60,5 @@
             android:background="@color/trans_white" />
         
     </RelativeLayout>
-    
+        
 </RelativeLayout>

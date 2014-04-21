@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 
 public class PublisherControlFragment extends Fragment implements
         View.OnClickListener {
@@ -17,18 +18,18 @@ public class PublisherControlFragment extends Fragment implements
     private static final String LOGTAG = "demo-UI-pub-control-fragment";
    
     // Animation constants
-    private static final int ANIMATION_DURATION = 1000;
-    private static final int PUBLISHER_CONTROLS_DURATION = 5000;
-
-    
-    private View mPublisherWidget;
-    private boolean mPublisherWidgetVisible = false;
+    private static final int ANIMATION_DURATION = 500;
+    private static final int PUBLISHER_CONTROLS_DURATION = 7000;
+  
+    protected boolean mPublisherWidgetVisible = false;
 	private ImageButton mPublisherMute;
     private ImageButton mSwapCamera;
     private Button mEndCall;
 
     private PublisherCallbacks mCallbacks = sOpenTokCallbacks;
     private ChatRoomActivity chatRoomActivity;
+    
+    protected RelativeLayout mPublisherContainer;
     
     public interface PublisherCallbacks {
         public void onMutePublisher();
@@ -91,9 +92,10 @@ public class PublisherControlFragment extends Fragment implements
 
         View rootView = inflater.inflate(R.layout.layout_fragment_pub_control,
                 container, false);
-        mPublisherWidget = rootView.findViewById(R.id.publisherwidget);		
-        showPublisherWidget(mPublisherWidgetVisible, false);
-
+        
+        mPublisherContainer = (RelativeLayout) chatRoomActivity
+				.findViewById(R.id.fragment_pub_container);
+         
         mPublisherMute = (ImageButton) rootView
                 .findViewById(R.id.mutePublisher);
         mPublisherMute.setOnClickListener(this);
@@ -185,7 +187,7 @@ public class PublisherControlFragment extends Fragment implements
         mCallbacks.onMutePublisher();
 
         mPublisherMute.setImageResource(chatRoomActivity.getmRoom().getmPublisher()
-                .getPublishAudio() ? R.drawable.mute : R.drawable.unmute);
+                .getPublishAudio() ? R.drawable.unmute_pub : R.drawable.mute_pub);
     }
 
     public void initPublisherUI() {
@@ -193,9 +195,8 @@ public class PublisherControlFragment extends Fragment implements
                 mPublisherWidgetTimerTask);
     	chatRoomActivity.getmHandler().postDelayed(mPublisherWidgetTimerTask,
     			PUBLISHER_CONTROLS_DURATION);
-     
         mPublisherMute.setImageResource(chatRoomActivity.getmRoom().getmPublisher()
-                .getPublishAudio() ? R.drawable.mute : R.drawable.unmute);
+                .getPublishAudio() ? R.drawable.unmute_pub : R.drawable.mute_pub);
     }
 
     private Runnable mPublisherWidgetTimerTask = new Runnable() {
@@ -211,21 +212,34 @@ public class PublisherControlFragment extends Fragment implements
     }
 
     private void showPublisherWidget(boolean show, boolean animate) {
-        mPublisherWidget.clearAnimation();
-        mPublisherWidgetVisible = show;
-        float dest = show ? 1.0f : 0.0f;
-        AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
-        aa.setDuration(animate ? ANIMATION_DURATION : 1);
-        aa.setFillAfter(true);
-        mPublisherWidget.startAnimation(aa);
+    	mPublisherContainer.clearAnimation();
+		mPublisherWidgetVisible = show;
+		float dest = show ? 1.0f : 0.0f;
+		AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
+		aa.setDuration(animate ? ANIMATION_DURATION : 1);
+		aa.setFillAfter(true);
+		mPublisherContainer.startAnimation(aa);
+
+		if (show) {
+			mPublisherContainer.setVisibility(View.VISIBLE);
+		} else {
+			mPublisherContainer.setVisibility(View.GONE);
+		}
     }
    
     public void publisherClick() {
-        if (!mPublisherWidgetVisible) {
-            showPublisherWidget(true);
-            
-        }
-        initPublisherUI();
+    	
+    	if (!mPublisherWidgetVisible) {
+			showPublisherWidget(true);
+		} else {
+			showPublisherWidget(false);
+		}
+    	
+		initPublisherUI();
     }
     
+	public boolean ismPublisherWidgetVisible() {
+		return mPublisherWidgetVisible;
+	}
+
 }

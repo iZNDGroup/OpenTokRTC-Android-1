@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class SubscriberControlFragment extends Fragment implements
@@ -16,14 +17,14 @@ public class SubscriberControlFragment extends Fragment implements
 
     private static final String LOGTAG = "demo-UI-sub-control-fragment";
 
-    private View mSubscriberWidget;
     private boolean mSubscriberWidgetVisible = false;
     private ImageButton mSubscriberMute;
     private TextView mSubscriberName;
+    private RelativeLayout mSubContainer;
 
     // Animation constants
-    private static final int ANIMATION_DURATION = 1000;
-    private static final int SUBSCRIBER_CONTROLS_DURATION = 5000;
+    private static final int ANIMATION_DURATION = 500;
+    private static final int SUBSCRIBER_CONTROLS_DURATION = 7000;
 
     private SubscriberCallbacks mCallbacks = sOpenTokCallbacks;
     private ChatRoomActivity chatRoomActivity;
@@ -76,8 +77,10 @@ public class SubscriberControlFragment extends Fragment implements
         View rootView = inflater.inflate(R.layout.layout_fragment_sub_control,
                 container, false);
 
-        mSubscriberWidget = rootView.findViewById(R.id.subscriberwidget);
-        showSubscriberWidget(mSubscriberWidgetVisible, false);
+        mSubContainer = (RelativeLayout) chatRoomActivity
+				.findViewById(R.id.fragment_sub_container);
+
+		showSubscriberWidget(mSubscriberWidgetVisible, false);
 
         mSubscriberMute = (ImageButton) rootView
                 .findViewById(R.id.muteSubscriber);
@@ -154,20 +157,29 @@ public class SubscriberControlFragment extends Fragment implements
     }
 
     private void showSubscriberWidget(boolean show, boolean animate) {
-        mSubscriberWidget.clearAnimation();
-        mSubscriberWidgetVisible = show;
-        float dest = show ? 1.0f : 0.0f;
-        AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
-        aa.setDuration(animate ? ANIMATION_DURATION : 1);
-        aa.setFillAfter(true);
-        mSubscriberWidget.startAnimation(aa);
+    	mSubContainer.clearAnimation();
+		mSubscriberWidgetVisible = show;
+		float dest = show ? 1.0f : 0.0f;
+		AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
+		aa.setDuration(animate ? ANIMATION_DURATION : 1);
+		aa.setFillAfter(true);
+		mSubContainer.startAnimation(aa);
+
+		if (show) {
+			mSubContainer.setVisibility(View.VISIBLE);
+		} else {
+			mSubContainer.setVisibility(View.GONE);
+		}
     }
 
     public void subscriberClick() {
         if (!mSubscriberWidgetVisible) {
             showSubscriberWidget(true);
         }
-
+        else {
+        	 showSubscriberWidget(false);
+        }
+        
         initSubscriberUI();
     }
 
@@ -179,7 +191,7 @@ public class SubscriberControlFragment extends Fragment implements
         mCallbacks.onMuteSubscriber();
 
         mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
-                .getSubscribeToAudio() ? R.drawable.mute : R.drawable.unmute);
+                .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
     }
 
    public void initSubscriberUI() {
@@ -189,13 +201,11 @@ public class SubscriberControlFragment extends Fragment implements
                 SUBSCRIBER_CONTROLS_DURATION);
         mSubscriberName.setText(chatRoomActivity.getmRoom().getmCurrentParticipant().getStream()
                 .getName());
-
     }
 
     public void initSubscriberWidget() {
-
         mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
-                .getSubscribeToAudio() ? R.drawable.mute : R.drawable.unmute);
+                .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
     }
 
 }
