@@ -11,8 +11,10 @@ public class Participant extends Subscriber {
 
 	private String userId;
     private String name;
-        
-    public Participant(Context context, Stream stream) {
+    private Context mContext;
+    public Boolean mSubscriberVideoOnly = false;
+  
+	public Participant(Context context, Stream stream) {
         super(context, stream, null);
         // With the userId we can query our own database
         // to extract player information
@@ -37,11 +39,16 @@ public class Participant extends Subscriber {
         this.name = name;
     }
 
+    public Boolean getmSubscriberVideoOnly() {
+		return mSubscriberVideoOnly;
+	}
 
     @Override
 	protected void onVideoDisabled(SubscriberKit subscriber) {
 		super.onVideoDisabled(subscriber);
-		this.setSubscribeToVideo(true);
+		ChatRoomActivity mActivity = (ChatRoomActivity) this.mContext;
+		mSubscriberVideoOnly = true;
+		mActivity.setAudioOnlyView(true);
 	}
 
 

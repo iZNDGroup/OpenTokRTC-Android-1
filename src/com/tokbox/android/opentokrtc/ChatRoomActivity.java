@@ -60,9 +60,12 @@ public class ChatRoomActivity extends Activity implements
 	private ViewPager mPlayersView;	
 	private ImageView leftArrowImage;
 	private ImageView rightArrowImage;	
+	private RelativeLayout mSubscriberAudioOnlyView;
+	
 	private RelativeLayout mMessageBox;
 	private RelativeLayout fragmentPubContainer;
 	private RelativeLayout fragmentSubContainer;
+	
 	
 	// Fragments
 	protected SubscriberControlFragment mSubscriberFragment;
@@ -109,6 +112,8 @@ public class ChatRoomActivity extends Activity implements
 		fragmentPubContainer = (RelativeLayout) findViewById(R.id.fragment_pub_container);
 		fragmentSubContainer  = (RelativeLayout) findViewById(R.id.fragment_sub_container);
 		
+		mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
+
 		if (savedInstanceState == null) {
 			initSubscriberFragment();
 			initPublisherFragment();
@@ -458,6 +463,28 @@ public class ChatRoomActivity extends Activity implements
 	
 	public PublisherControlFragment getmPublisherFragment() {
 		return mPublisherFragment;
+	}
+	
+	public void setAudioOnlyView(boolean audioOnlyEnabled) {
+		mSubscriberVideoOnly = audioOnlyEnabled;
+
+		if (audioOnlyEnabled) {
+			mRoom.getmCurrentParticipant().getView().setVisibility(View.GONE);
+			mSubscriberAudioOnlyView.setVisibility(View.VISIBLE);
+			mSubscriberAudioOnlyView.setOnClickListener(onSubscriberUIClick);
+
+			// Audio only text for subscriber
+			TextView subStatusText = (TextView) findViewById(R.id.subscriberName);
+			subStatusText.setText(R.string.audioOnly);
+			AlphaAnimation aa = new AlphaAnimation(1.0f, 0.0f);
+			aa.setDuration(ANIMATION_DURATION);
+			subStatusText.startAnimation(aa);
+		} else {
+			if (!mSubscriberVideoOnly) {
+				mRoom.getmCurrentParticipant().getView().setVisibility(View.VISIBLE);
+				mSubscriberAudioOnlyView.setVisibility(View.GONE);
+			}
+		}
 	}
 	
 	/**

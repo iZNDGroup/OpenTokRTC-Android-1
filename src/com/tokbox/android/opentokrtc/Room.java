@@ -31,10 +31,11 @@ import com.opentok.android.Stream;
 
 public class Room extends Session {
    
-
 	public static final String TAG = "Room";
 
 	Context mContext;
+	ChatRoomActivity mActivity;
+	
 	String apikey;
 	String sessionId;
 	String token;
@@ -94,6 +95,9 @@ public class Room extends Session {
 					if (!p.getSubscribeToVideo()) {
 						p.setSubscribeToVideo(true);
 					}
+					if(p.getmSubscriberVideoOnly()) {
+						mActivity.setAudioOnlyView(true);
+					}
 				} else {
 					if (p.getSubscribeToVideo()) {
 						p.setSubscribeToVideo(false);
@@ -117,7 +121,6 @@ public class Room extends Session {
 			}
 			return POSITION_NONE;
 		}
-
 	};
 
 	public Room(Context context, String roomName, String sessionId, String token, String apiKey) {
@@ -127,6 +130,7 @@ public class Room extends Session {
 		this.token = token;
 		this.mContext = context;
 		this.mHandler = new Handler(context.getMainLooper());
+		mActivity = (ChatRoomActivity) this.mContext;
 	}
 
 	// public methods
@@ -348,8 +352,7 @@ public class Room extends Session {
 	
     @Override
    	protected void onPublisherAdded(Session session, PublisherKit publisher) {
-    	ChatRoomActivity a = (ChatRoomActivity) this.mContext;
-    	a.getmPublisherFragment().showPublisherWidget(true);
-    	a.getmPublisherFragment().initPublisherUI();
+     	mActivity.getmPublisherFragment().showPublisherWidget(true);
+    	mActivity.getmPublisherFragment().initPublisherUI();
     }
 }

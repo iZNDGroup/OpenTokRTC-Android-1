@@ -46,6 +46,41 @@
                 android:src="@drawable/right_arrow"
                 android:onClick="nextParticipant"> 
             </ImageView>
+            
+            <RelativeLayout
+                android:id="@+id/audioOnlyView"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone" >
+
+                <ImageView
+                    android:id="@+id/noVideo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/avatar"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="28dp"
+                    android:src="@drawable/no_video" />
+
+                <ImageView
+                    android:id="@+id/speakerActive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignRight="@+id/noVideo"
+                    android:layout_below="@+id/noVideo"
+                    android:layout_marginTop="21dp"
+                    android:src="@drawable/speaker_active" />
+
+                <ImageView
+                    android:id="@+id/avatar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/avatar" />
+            </RelativeLayout>
+            
         </RelativeLayout>
 
         <RelativeLayout
