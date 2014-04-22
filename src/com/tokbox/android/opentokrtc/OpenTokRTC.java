@@ -29,8 +29,13 @@ public class OpenTokRTC extends Activity
         EditText roomNameInput = (EditText) findViewById(R.id.input_room_name);
         String roomName = roomNameInput.getText().toString();
 
+        EditText usernameInput = (EditText) findViewById(R.id.input_username);
+        String username = usernameInput.getText().toString();
+
         Intent enterChatRoomIntent = new Intent(this, ChatRoomActivity.class);
         enterChatRoomIntent.putExtra(ChatRoomActivity.ARG_ROOM_ID, roomName);
+        enterChatRoomIntent.putExtra(ChatRoomActivity.ARG_USERNAME_ID, username);
+        
         startActivity(enterChatRoomIntent);
     }
 

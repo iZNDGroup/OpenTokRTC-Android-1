@@ -48,10 +48,12 @@ public class ChatRoomActivity extends Activity implements
 	private static final int NOTIFICATION_ID = 1;
 	public static final String LOGTAG = "ChatRoomActivity";
 	public static final String ARG_ROOM_ID = "roomId";
+	public static final String ARG_USERNAME_ID = "usernameId";
 	private static final int ANIMATION_DURATION = 500;   
 	  
 	private String mRoomName;
 	protected Room mRoom;
+	private String mUsername = null;
 	private boolean mSubscriberVideoOnly = false;
 	
 	private ProgressDialog mConnectingDialog;
@@ -94,6 +96,7 @@ public class ChatRoomActivity extends Activity implements
 		Uri url = getIntent().getData();
         if(url == null) {
             mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
+            mUsername = getIntent().getStringExtra(ARG_USERNAME_ID);
         } else {
             mRoomName = url.getPathSegments().get(0);
         }
@@ -197,7 +200,7 @@ public class ChatRoomActivity extends Activity implements
 		mConnectingDialog.show();
 
 		GetRoomDataTask task = new GetRoomDataTask();
-		task.execute(mRoomName);
+		task.execute(mRoomName, mUsername);
 	}
 
 	private class GetRoomDataTask extends AsyncTask<String, Void, Room> {
@@ -233,7 +236,7 @@ public class ChatRoomActivity extends Activity implements
 				return null;
 			}
 			return new Room(ChatRoomActivity.this, params[0], sessionId, token,
-					apiKey);
+					apiKey, params [1]);
 		}
 
 		@Override

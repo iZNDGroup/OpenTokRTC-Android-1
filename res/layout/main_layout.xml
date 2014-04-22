@@ -9,34 +9,48 @@
     tools:context=".OpenTokRTC"
     style="@style/AppTheme.RoomSelectionArea">
 
-    <LinearLayout android:id="@+id/inputArea"
+    <RelativeLayout android:id="@+id/inputArea"
         android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:orientation="horizontal"
+        android:layout_width="wrap_content"
         android:layout_centerInParent="true">
-
-        <EditText android:id="@+id/input_room_name"
+    
+        <EditText
+            android:id="@+id/input_room_name"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_width="0dip"
-            android:layout_weight="1"
-            android:hint="@string/input_room_name_hint" />
+            android:ems="10"
+            android:layout_centerHorizontal="true"
+            android:hint="@string/input_room_name_hint" >
+		<requestFocus />
+        </EditText>
+
+        <EditText
+            android:id="@+id/input_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/input_room_name"
+            android:layout_marginTop="20dp"
+            android:hint="@string/input_username_hint" />
 
         <Button android:id="@+id/button_join_room"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_below="@+id/input_username"
+            android:layout_marginTop="20dp" 
+            android:layout_centerHorizontal="true"
             android:text="@string/button_join_room"
             android:background="@color/white"
-            android:onClick="joinRoom"/>
-
-    </LinearLayout>
+            android:onClick="joinRoom" />
+        
+    </RelativeLayout>
 
     <TextView android:id="@+id/introText"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:text="@string/room_selection_intro"
         android:layout_above="@id/inputArea"
-        style="@style/AppTheme.TitleText"
-        />
-
+        style="@style/AppTheme.TitleText" />
 
 </RelativeLayout>
