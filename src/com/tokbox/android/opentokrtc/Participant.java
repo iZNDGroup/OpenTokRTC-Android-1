@@ -9,34 +9,34 @@ import com.opentok.android.SubscriberKit;
 
 public class Participant extends Subscriber {
 
-	private String userId;
-    private String name;
+	private String mUserId;
+    private String mName;
     private Context mContext;
-    public Boolean mSubscriberVideoOnly = false;
+    protected Boolean mSubscriberVideoOnly = false;
   
 	public Participant(Context context, Stream stream) {
         super(context, stream, null);
         // With the userId we can query our own database
         // to extract player information
         // this.name = "Guest-" + (this.myConnectionId.substring(this.myConnectionId.length - 8, this.myConnectionId.length));
-        setName("User" + ((int)(Math.random()*1000)));
+        setmName("User" + ((int)(Math.random()*1000)));
         this.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
     }
 
-    public String getUserId() {
-        return userId;
+    public String getmUserId() {
+        return mUserId;
     }
 
-    public void setUserId(String name) {
-        this.userId = name;
+    public void setmUserId(String name) {
+        this.mUserId = name;
     }
 
-    public String getName() {
-        return name;
+    public String getmName() {
+        return mName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setmName(String name) {
+        this.mName = name;
     }
 
     public Boolean getmSubscriberVideoOnly() {

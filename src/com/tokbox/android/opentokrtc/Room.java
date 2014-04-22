@@ -33,21 +33,21 @@ public class Room extends Session {
    
 	public static final String TAG = "Room";
 
-	Context mContext;
-	ChatRoomActivity mActivity;
+	private Context mContext;
+	private ChatRoomActivity mActivity;
 	
 	String apikey;
 	String sessionId;
 	String token;
 	
-	String mPublisherName = "name";
+	private String mPublisherName = "name";
 	
 	// Interface
-	ViewPager mParticipantsViewContainer;
-	ViewGroup mPreview;
-	TextView mMessageView;
-	ScrollView mMessageScroll;
-	OnClickListener onSubscriberUIClick;
+	private ViewPager mParticipantsViewContainer;
+	private ViewGroup mPreview;
+	private TextView mMessageView;
+	private ScrollView mMessageScroll;
+	private OnClickListener onSubscriberUIClick;
 	
 	protected Publisher mPublisher;
 	protected Participant mCurrentParticipant;
@@ -73,7 +73,7 @@ public class Room extends Session {
 		@Override
 		public CharSequence getPageTitle(int position) {
 			if (position < mParticipants.size()) {
-				return mParticipants.get(position).getName();
+				return mParticipants.get(position).getmName();
 			} else {
 				return null;
 			}
@@ -192,7 +192,7 @@ public class Room extends Session {
 		Participant p = new Participant(mContext, stream);
 	
 		// we can use connection data to obtain each user id
-		p.setUserId(stream.getConnection().getData());
+		p.setmUserId(stream.getConnection().getData());
 
 		// Subscribe audio only if we have more than one player
 		if (mParticipants.size() != 0) {
@@ -209,7 +209,7 @@ public class Room extends Session {
 		mParticipantConnection.put(stream.getConnection().getConnectionId(), p);
 		mPagerAdapter.notifyDataSetChanged();
 
-		presentText("\n" + p.getName() + " has joined the chat");
+		presentText("\n" + p.getmName() + " has joined the chat");
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class Room extends Session {
 			mParticipantConnection.remove(stream.getConnection().getConnectionId());
 			mPagerAdapter.notifyDataSetChanged();
 
-			presentText("\n" + p.getName() + " has left the chat");
+			presentText("\n" + p.getmName() + " has left the chat");
 		}
 	}
 
@@ -241,8 +241,8 @@ public class Room extends Session {
                         json = new JSONObject(data);
                         String text = json.getString("text");
                         String name = json.getString("name");
-                        p.setName(name);
-                        presentMessage(p.getName(), text);
+                        p.setmName(name);
+                        presentMessage(p.getmName(), text);
                     } catch (JSONException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -253,10 +253,10 @@ public class Room extends Session {
                 Participant p = mParticipantConnection.get(cid);
                 if (p != null) {
                     try {
-                        String oldName = p.getName();
+                        String oldName = p.getmName();
                         JSONArray jsonArray = new JSONArray(data);
                         String name = jsonArray.getString(1);
-                        p.setName(name);
+                        p.setmName(name);
                         presentText("\n" + oldName + " is now known as " + name);
                     } catch (JSONException e) {
                         // TODO Auto-generated catch block
@@ -273,7 +273,7 @@ public class Room extends Session {
                         String pcid = it.next();
                         Participant p = mParticipantConnection.get(pcid);
                         if (p != null) {
-                            p.setName(users.getString(pcid));
+                            p.setmName(users.getString(pcid));
                         }
                     }
                 } catch (JSONException e) {

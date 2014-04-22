@@ -58,14 +58,11 @@ public class ChatRoomActivity extends Activity implements
 	private EditText mMessageEditText;
 	private ViewGroup mPreview;
 	private ViewPager mPlayersView;	
-	private ImageView leftArrowImage;
-	private ImageView rightArrowImage;	
+	private ImageView mLeftArrowImage;
+	private ImageView mRightArrowImage;	
+	
 	private RelativeLayout mSubscriberAudioOnlyView;
-	
 	private RelativeLayout mMessageBox;
-	private RelativeLayout fragmentPubContainer;
-	private RelativeLayout fragmentSubContainer;
-	
 	
 	// Fragments
 	protected SubscriberControlFragment mSubscriberFragment;
@@ -106,11 +103,8 @@ public class ChatRoomActivity extends Activity implements
 		mPreview = (ViewGroup) findViewById(R.id.publisherview);
 
 		mPlayersView = (ViewPager) findViewById(R.id.pager);
-		leftArrowImage = (ImageView) findViewById(R.id.left_arrow);
-		rightArrowImage = (ImageView) findViewById(R.id.right_arrow);
-		
-		fragmentPubContainer = (RelativeLayout) findViewById(R.id.fragment_pub_container);
-		fragmentSubContainer  = (RelativeLayout) findViewById(R.id.fragment_sub_container);
+		mLeftArrowImage = (ImageView) findViewById(R.id.left_arrow);
+		mRightArrowImage = (ImageView) findViewById(R.id.right_arrow);
 		
 		mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
 
@@ -167,7 +161,6 @@ public class ChatRoomActivity extends Activity implements
         if (mRoom != null) {
         	mRoom.onResume();
         }
-
 	}
 
 	@Override
@@ -423,7 +416,7 @@ public class ChatRoomActivity extends Activity implements
 		
 		boolean show = false;
 		if (mRoom.getmParticipants().size() > 1 ) {
-	        	if (leftArrowImage.getVisibility() == View.GONE) {
+	        	if (mLeftArrowImage.getVisibility() == View.GONE) {
 	        		show = true;
 	        	}
 	        	else {
@@ -431,23 +424,23 @@ public class ChatRoomActivity extends Activity implements
 	        	}
 		}
 		
-		leftArrowImage.clearAnimation();
-		rightArrowImage.clearAnimation();
+		mLeftArrowImage.clearAnimation();
+		mRightArrowImage.clearAnimation();
 		float dest = show ? 1.0f : 0.0f;
 		AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
 		aa.setDuration(ANIMATION_DURATION);
 		aa.setFillAfter(true);
-		leftArrowImage.startAnimation(aa);
-		rightArrowImage.startAnimation(aa);
+		mLeftArrowImage.startAnimation(aa);
+		mRightArrowImage.startAnimation(aa);
 		
 		//show subscriber views arrows
         if (show) {
-        	leftArrowImage.setVisibility(View.VISIBLE);
-        	rightArrowImage.setVisibility(View.VISIBLE);
+        	mLeftArrowImage.setVisibility(View.VISIBLE);
+        	mRightArrowImage.setVisibility(View.VISIBLE);
         }
         else {
-        	leftArrowImage.setVisibility(View.GONE);
-        	rightArrowImage.setVisibility(View.GONE);
+        	mLeftArrowImage.setVisibility(View.GONE);
+        	mRightArrowImage.setVisibility(View.GONE);
         }
 	}
 	
