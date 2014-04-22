@@ -24,7 +24,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
                 android:layout_alignParentTop="true" />
-
+			
             <ImageView
                 android:id="@+id/left_arrow"
                 android:layout_width="wrap_content"

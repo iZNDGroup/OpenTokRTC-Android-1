@@ -28,6 +28,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -45,15 +46,18 @@ public class ChatRoomActivity extends Activity implements
 		PublisherControlFragment.PublisherCallbacks {
 
 	private static final int NOTIFICATION_ID = 1;
-    public static final String LOGTAG = "ChatRoomActivity";
+	public static final String LOGTAG = "ChatRoomActivity";
 	public static final String ARG_ROOM_ID = "roomId";
+	private static final int ANIMATION_DURATION = 500;   
+	  
 	private String mRoomName;
+	protected Room mRoom;
+	private boolean mSubscriberVideoOnly = false;
+	
 	private ProgressDialog mConnectingDialog;
 	private EditText mMessageEditText;
 	private ViewGroup mPreview;
-	private ViewPager mPlayersView;
-	protected Room mRoom;
-	private boolean mSubscriberVideoOnly = false;
+	private ViewPager mPlayersView;	
 	private ImageView leftArrowImage;
 	private ImageView rightArrowImage;	
 	private RelativeLayout mMessageBox;
@@ -117,10 +121,10 @@ public class ChatRoomActivity extends Activity implements
        // OpenTokConfig.setOTKitLogs(true);
         //enable bindings logs
        // OpenTokConfig.setJNILogs(true);
-         
+          
 		initializeRoom();
 	}
-
+	
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -173,7 +177,15 @@ public class ChatRoomActivity extends Activity implements
             }
         }
 	}
-
+	
+	@Override
+	public void onBackPressed() {
+		if (mRoom != null) {
+			mRoom.disconnect();
+		}
+		super.onBackPressed();
+	}
+	
 	private void initializeRoom() {
 		Log.i(LOGTAG, "initializing chat room fragment for room: " + mRoomName);
 		setTitle(mRoomName);
@@ -354,22 +366,10 @@ public class ChatRoomActivity extends Activity implements
 		@Override
 		public void onClick(View v) {
 			mSubscriberFragment.subscriberClick();
-			showSubFragment();
+			showArrowsOnSubscriber();
 			
 			mPublisherFragment.publisherClick();
-			showPubFragment();
-			
-			//show subscriber views arrows
-            if (mRoom.getmParticipants().size() > 1 ) {
-            	if (leftArrowImage.getVisibility() == View.GONE) {
-            		leftArrowImage.setVisibility(View.VISIBLE);
-            		rightArrowImage.setVisibility(View.VISIBLE);
-            	}
-            	else {
-            		leftArrowImage.setVisibility(View.GONE);
-            		rightArrowImage.setVisibility(View.GONE);
-            	}
-            }
+			setPublisherMargins();
 		}
 	};
 
@@ -377,35 +377,33 @@ public class ChatRoomActivity extends Activity implements
 		@Override
 		public void onClick(View v) {
 			if	(mRoom.getmCurrentParticipant()!= null) {
-				Log.i("****marinas", "participant");
-            	mSubscriberFragment.subscriberClick();
-            	showSubFragment();
+				mSubscriberFragment.subscriberClick();
+				showArrowsOnSubscriber();
             }
             if (mRoom.getmPublisher() != null) {
             	mPublisherFragment.publisherClick();
-            	showPubFragment();
+            	setPublisherMargins();
             }
         }
 	};
 	
 	@Override
 	public void onStatusPubBar() {
-		showPubFragment();
-	}
-	@Override
-	public void onStatusSubBar() {
-		showSubFragment();	
+		setPublisherMargins();
 	}
 	
-	public void showPubFragment(){
+	@Override
+	public void onStatusSubBar() {
+		showArrowsOnSubscriber();	
+	}
+	
+	public void setPublisherMargins(){
 		
 		if (mPublisherFragment.ismPublisherWidgetVisible()) {
 			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
 					.getLayoutParams();
 			params.bottomMargin = dpToPx(68);
-			mPreview.setLayoutParams(params);
-			fragmentPubContainer.setVisibility(View.VISIBLE);
-			
+			mPreview.setLayoutParams(params);		
 		} else {
 			
 			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
@@ -413,18 +411,41 @@ public class ChatRoomActivity extends Activity implements
 			params.addRule(RelativeLayout.ALIGN_BOTTOM);
 			params.bottomMargin = dpToPx(20);
 			mPreview.setLayoutParams(params);
-			fragmentPubContainer.setVisibility(View.GONE);
 		}
 	}
 	
-	public void showSubFragment(){
+	public void showArrowsOnSubscriber(){
 		
-		if (fragmentSubContainer.getVisibility() == View.GONE) {
-			fragmentSubContainer.setVisibility(View.VISIBLE);
-		} else {
-			fragmentSubContainer.setVisibility(View.GONE);
+		boolean show = false;
+		if (mRoom.getmParticipants().size() > 1 ) {
+	        	if (leftArrowImage.getVisibility() == View.GONE) {
+	        		show = true;
+	        	}
+	        	else {
+	        		show = false;
+	        	}
 		}
+		
+		leftArrowImage.clearAnimation();
+		rightArrowImage.clearAnimation();
+		float dest = show ? 1.0f : 0.0f;
+		AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
+		aa.setDuration(ANIMATION_DURATION);
+		aa.setFillAfter(true);
+		leftArrowImage.startAnimation(aa);
+		rightArrowImage.startAnimation(aa);
+		
+		//show subscriber views arrows
+        if (show) {
+        	leftArrowImage.setVisibility(View.VISIBLE);
+        	rightArrowImage.setVisibility(View.VISIBLE);
+        }
+        else {
+        	leftArrowImage.setVisibility(View.GONE);
+        	rightArrowImage.setVisibility(View.GONE);
+        }
 	}
+	
 	public void nextParticipant(View view) {
 		int nextPosition = mRoom.getmCurrentPosition() +1;
 		mPlayersView.setCurrentItem(nextPosition);

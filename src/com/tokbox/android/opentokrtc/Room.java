@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
@@ -225,7 +224,7 @@ public class Room extends Session {
 	@Override
 	protected void onSignalReceived(Session session, String type, String data,
 			Connection connection) {
-	    Log.d(TAG, "Received signal:" + type + " data:" + data);
+	    Log.d(TAG, "Received signal:" + type + " data:" + data + "connection: " + connection);
         String mycid = this.getConnection().getConnectionId();
         String cid = connection.getConnectionId();
         if (!cid.equals(mycid)) {
@@ -347,7 +346,6 @@ public class Room extends Session {
         }, 500);
     }
 	
-    
     @Override
    	protected void onPublisherAdded(Session session, PublisherKit publisher) {
     	ChatRoomActivity a = (ChatRoomActivity) this.mContext;
