@@ -425,16 +425,15 @@ public class ChatRoomActivity extends Activity implements
 	        	else {
 	        		show = false;
 	        	}
+	        	mLeftArrowImage.clearAnimation();
+	    		mRightArrowImage.clearAnimation();
+	    		float dest = show ? 1.0f : 0.0f;
+	    		AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
+	    		aa.setDuration(ANIMATION_DURATION);
+	    		aa.setFillAfter(true);
+	    		mLeftArrowImage.startAnimation(aa);
+	    		mRightArrowImage.startAnimation(aa);	    		
 		}
-		
-		mLeftArrowImage.clearAnimation();
-		mRightArrowImage.clearAnimation();
-		float dest = show ? 1.0f : 0.0f;
-		AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
-		aa.setDuration(ANIMATION_DURATION);
-		aa.setFillAfter(true);
-		mLeftArrowImage.startAnimation(aa);
-		mRightArrowImage.startAnimation(aa);
 		
 		//show subscriber views arrows
         if (show) {
@@ -445,6 +444,7 @@ public class ChatRoomActivity extends Activity implements
         	mLeftArrowImage.setVisibility(View.GONE);
         	mRightArrowImage.setVisibility(View.GONE);
         }
+		
 	}
 	
 	public void nextParticipant(View view) {
