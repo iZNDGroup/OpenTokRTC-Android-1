@@ -234,41 +234,46 @@ public class Room extends Session {
 	protected void onSignalReceived(Session session, String type, String data,
 			Connection connection) {
 	    Log.d(TAG, "Received signal:" + type + " data:" + data + "connection: " + connection);
-        String mycid = this.getConnection().getConnectionId();
-        String cid = connection.getConnectionId();
-        if (!cid.equals(mycid)) {
-            if ("chat".equals(type)) {
-                // Text message
-                Participant p = mParticipantConnection.get(cid);
-                if (p != null) {
-                    JSONObject json;
-                    try {
-                        json = new JSONObject(data);
-                        String text = json.getString("text");
-                        String name = json.getString("name");
-                        p.setmName(name);
-                        presentMessage(p.getmName(), text);
-                    } catch (JSONException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            } else if("name".equals(type)) {
-                // Name change message
-                Participant p = mParticipantConnection.get(cid);
-                if (p != null) {
-                    try {
-                        String oldName = p.getmName();
-                        JSONArray jsonArray = new JSONArray(data);
-                        String name = jsonArray.getString(1);
-                        p.setmName(name);
-                        presentText("\n" + oldName + " is now known as " + name);
-                    } catch (JSONException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            } else if("initialize".equals(type)) {
+        
+	    if (connection != null) {
+	    	String mycid = this.getConnection().getConnectionId();
+        	String cid = connection.getConnectionId();
+        	if (!cid.equals(mycid)) {
+        		if ("chat".equals(type)) {
+        			// Text message
+        			Participant p = mParticipantConnection.get(cid);
+        			if (p != null) {
+        				JSONObject json;
+        				try {
+        					json = new JSONObject(data);
+        					String text = json.getString("text");
+        					String name = json.getString("name");
+        					p.setmName(name);
+        					presentMessage(p.getmName(), text);
+        				} catch (JSONException e) {
+        					// TODO Auto-generated catch block
+        					e.printStackTrace();
+        				}
+        			}
+        		} else if("name".equals(type)) {
+        			// Name change message
+        			Participant p = mParticipantConnection.get(cid);
+        			if (p != null) {
+        				try {
+        					String oldName = p.getmName();
+        					JSONArray jsonArray = new JSONArray(data);
+        					String name = jsonArray.getString(1);
+        					p.setmName(name);
+        					presentText("\n" + oldName + " is now known as " + name);
+        				} catch (JSONException e) {
+        					// TODO Auto-generated catch block
+        					e.printStackTrace();
+        				}
+        			}
+        		} 
+        	} 
+        }
+	    else if("initialize".equals(type)) {
                 // Initialize message
                 try {
                     JSONObject json = new JSONObject(data);
@@ -285,12 +290,8 @@ public class Room extends Session {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
-                Participant p = mParticipantConnection.get(cid);
-                if (p != null) {
-                }
             }
-        }
+        
 	}
 
 	private void presentMessage(String who, String message) {
