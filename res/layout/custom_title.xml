@@ -3,7 +3,6 @@
     android:id="@+id/title_bar"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#000000"
     android:orientation="horizontal" >
 
    <ImageView
@@ -19,11 +18,11 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_centerInParent="true"
         android:layout_toRightOf="@+id/icon"
         android:text="@string/app_name"
         android:textColor="#ffffff"
-        android:textSize="20sp" />
+        android:textSize="18sp"/>
 
     <ImageView
         android:id="@+id/text_chat_icon"

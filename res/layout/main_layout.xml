@@ -19,6 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
+            android:textColor="@color/white"
             android:layout_centerHorizontal="true"
             android:hint="@string/input_room_name_hint" >
 		<requestFocus />
@@ -29,6 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
+            android:textColor="@color/white"
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/input_room_name"
             android:layout_marginTop="20dp"

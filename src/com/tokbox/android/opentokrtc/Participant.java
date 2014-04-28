@@ -1,8 +1,11 @@
 package com.tokbox.android.opentokrtc;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 
 import com.opentok.android.BaseVideoRenderer;
+import com.opentok.android.OpentokError;
 import com.opentok.android.Stream;
 import com.opentok.android.Subscriber;
 import com.opentok.android.SubscriberKit;
@@ -13,12 +16,15 @@ public class Participant extends Subscriber {
     private String mName;
     private Context mContext;
     protected Boolean mSubscriberVideoOnly = false;
-  
+    private ChatRoomActivity mActivity;
+    
 	public Participant(Context context, Stream stream) {
         super(context, stream, null);
         // With the userId we can query our own database
         // to extract player information
         // this.name = "Guest-" + (this.myConnectionId.substring(this.myConnectionId.length - 8, this.myConnectionId.length));
+        this.mContext = context;
+        this.mActivity = (ChatRoomActivity) this.mContext;
         setmName("User" + ((int)(Math.random()*1000)));
         this.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
     }
@@ -46,10 +52,31 @@ public class Participant extends Subscriber {
     @Override
 	protected void onVideoDisabled(SubscriberKit subscriber) {
 		super.onVideoDisabled(subscriber);
-		ChatRoomActivity mActivity = (ChatRoomActivity) this.mContext;
 		mSubscriberVideoOnly = true;
 		mActivity.setAudioOnlyView(true);
 	}
 
+	@Override
+	protected void onError(SubscriberKit subscriber, OpentokError error) {
+		super.onError(subscriber, error);
+		showErrorDialog(error);
+	}
 
+	private void showErrorDialog(OpentokError error) {
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+				this.mContext);
+ 
+		alertDialogBuilder.setTitle("OpenTokRTC Error");
+		alertDialogBuilder
+			.setMessage(error.getMessage())
+			.setCancelable(false)
+			.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,int id) {
+						mActivity.finish();
+					}
+				  });
+		AlertDialog alertDialog = alertDialogBuilder.create();
+		
+		alertDialog.show();
+	}
 }

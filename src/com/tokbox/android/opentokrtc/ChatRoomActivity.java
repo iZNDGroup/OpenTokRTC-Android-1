@@ -40,6 +40,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.opentok.android.OpenTokConfig;
+import com.tokbox.android.opentokrtc.fragments.PublisherControlFragment;
+import com.tokbox.android.opentokrtc.fragments.PublisherStatusFragment;
+import com.tokbox.android.opentokrtc.fragments.SubscriberControlFragment;
 
 public class ChatRoomActivity extends Activity implements
 		SubscriberControlFragment.SubscriberCallbacks,
@@ -55,6 +58,7 @@ public class ChatRoomActivity extends Activity implements
 	protected Room mRoom;
 	private String mUsername = null;
 	private boolean mSubscriberVideoOnly = false;
+	private boolean mArchiving = false;
 	
 	private ProgressDialog mConnectingDialog;
 	private EditText mMessageEditText;
@@ -69,7 +73,8 @@ public class ChatRoomActivity extends Activity implements
 	// Fragments
 	protected SubscriberControlFragment mSubscriberFragment;
 	protected PublisherControlFragment mPublisherFragment;
-
+	protected PublisherStatusFragment mPublisherStatusFragment;
+	
 	protected Handler mHandler = new Handler();
 
 	private NotificationCompat.Builder mNotifyBuilder;
@@ -114,6 +119,7 @@ public class ChatRoomActivity extends Activity implements
 		if (savedInstanceState == null) {
 			initSubscriberFragment();
 			initPublisherFragment();
+			initPublisherStatusFragment();
 		}
 	      
         mNotificationManager =
@@ -313,7 +319,13 @@ public class ChatRoomActivity extends Activity implements
 				.add(R.id.fragment_pub_container, mPublisherFragment)
 				.commit();	
 	}
-
+	
+	public void initPublisherStatusFragment() {
+		mPublisherStatusFragment = new PublisherStatusFragment();
+		getFragmentManager().beginTransaction()
+				.add(R.id.fragment_pub_status_container, mPublisherStatusFragment)
+				.commit();	
+	}
 	public void initSubscriberFragment() {
 		mSubscriberFragment = new SubscriberControlFragment();
 		getFragmentManager().beginTransaction()
@@ -369,8 +381,13 @@ public class ChatRoomActivity extends Activity implements
 			mSubscriberFragment.subscriberClick();
 			showArrowsOnSubscriber();
 			
-			mPublisherFragment.publisherClick();
-			setPublisherMargins();
+			if (mRoom.getmPublisher() != null) {
+				mPublisherFragment.publisherClick();
+				if (mArchiving) {
+					mPublisherStatusFragment.publisherClick();	
+				}
+				setPublisherMargins();
+			}
 		}
 	};
 
@@ -383,6 +400,9 @@ public class ChatRoomActivity extends Activity implements
             }
             if (mRoom.getmPublisher() != null) {
             	mPublisherFragment.publisherClick();
+            	if (mArchiving) {
+            		mPublisherStatusFragment.publisherClick();
+            	}
             	setPublisherMargins();
             }
         }
@@ -399,20 +419,29 @@ public class ChatRoomActivity extends Activity implements
 	}
 	
 	public void setPublisherMargins(){
-		
-		if (mPublisherFragment.ismPublisherWidgetVisible()) {
-			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
-					.getLayoutParams();
-			params.bottomMargin = dpToPx(68);
-			mPreview.setLayoutParams(params);		
-		} else {
-			
-			RelativeLayout.LayoutParams params = (LayoutParams) mPreview
-					.getLayoutParams();
-			params.addRule(RelativeLayout.ALIGN_BOTTOM);
-			params.bottomMargin = dpToPx(20);
-			mPreview.setLayoutParams(params);
+		int bottomMargin = 0;
+		RelativeLayout.LayoutParams params = (LayoutParams) mPreview
+				.getLayoutParams();
+		RelativeLayout.LayoutParams pubControlLayoutParams = (LayoutParams) mPublisherFragment
+				.getmPublisherContainer().getLayoutParams();
+		RelativeLayout.LayoutParams pubStatusLayoutParams = (LayoutParams) mPublisherStatusFragment
+				.getMPubStatusContainer().getLayoutParams();
+
+		if (mPublisherFragment.ismPublisherWidgetVisible() && mArchiving) {
+			bottomMargin = pubControlLayoutParams.height
+					+ pubStatusLayoutParams.height + dpToPx(20);
 		}
+		else {
+			if (mPublisherFragment.ismPublisherWidgetVisible()) {
+				bottomMargin = pubControlLayoutParams.height + dpToPx(20);
+			} else {	
+				params.addRule(RelativeLayout.ALIGN_BOTTOM);
+				bottomMargin = dpToPx(20);
+			}
+		}
+		params.bottomMargin = bottomMargin;
+		params.leftMargin = dpToPx(20);
+		mPreview.setLayoutParams(params);
 	}
 	
 	public void showArrowsOnSubscriber(){
@@ -444,7 +473,6 @@ public class ChatRoomActivity extends Activity implements
         	mLeftArrowImage.setVisibility(View.GONE);
         	mRightArrowImage.setVisibility(View.GONE);
         }
-		
 	}
 	
 	public void nextParticipant(View view) {
@@ -475,6 +503,7 @@ public class ChatRoomActivity extends Activity implements
 			AlphaAnimation aa = new AlphaAnimation(1.0f, 0.0f);
 			aa.setDuration(ANIMATION_DURATION);
 			subStatusText.startAnimation(aa);
+			
 		} else {
 			if (!mSubscriberVideoOnly) {
 				mRoom.getmCurrentParticipant().getView().setVisibility(View.VISIBLE);
@@ -483,12 +512,32 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 	
+	public void updateArchivingStatus(boolean archiving) {
+		mPublisherFragment.showPublisherWidget(false);
+		mArchiving = archiving;
+		
+		if (archiving) {
+			mPublisherStatusFragment.updateArchivingUI(true);
+			mPublisherFragment.showPublisherWidget(true);
+			mPublisherFragment.initPublisherUI();
+			setPublisherMargins();
+
+			if (mRoom.getmCurrentParticipant() != null) {
+				mSubscriberFragment.showSubscriberWidget(true);
+			}
+		}
+		else {
+			mPublisherStatusFragment.updateArchivingUI(false);
+			setPublisherMargins();
+		}
+	}
+	
 	/**
      * Converts dp to real pixels, according to the screen density.
      * @param dp A number of density-independent pixels.
      * @return The equivalent number of real pixels.
      */
-    private int dpToPx(int dp) {
+    public int dpToPx(int dp) {
         double screenDensity = this.getResources().getDisplayMetrics().density;
         return (int) (screenDensity * (double) dp);
     }

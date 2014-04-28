@@ -21,9 +21,11 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.Connection;
+import com.opentok.android.OpentokError;
 import com.opentok.android.Publisher;
 import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
@@ -152,6 +154,7 @@ public class Room extends Session {
 	}
 
 	public void connect() {
+		//this.connect(token);
 		this.connect(token);
 	}
 
@@ -358,7 +361,45 @@ public class Room extends Session {
 	
     @Override
    	protected void onPublisherAdded(Session session, PublisherKit publisher) {
-     	mActivity.getmPublisherFragment().showPublisherWidget(true);
-    	mActivity.getmPublisherFragment().initPublisherUI();
+    	mHandler.postDelayed(new Runnable() {	  
+            @Override
+            public void run() {
+            	mActivity.getmPublisherFragment().showPublisherWidget(true);
+            	mActivity.getmPublisherFragment().initPublisherUI();
+            }
+        }, 0);	
     }
+    
+	@Override
+	public void archiveCreated(Session session, String archiveName,
+			String archiveId, String archiveStatus) {	
+		super.archiveCreated(session, archiveName, archiveId, archiveStatus);
+		
+		mHandler.postDelayed(new Runnable() {  
+            @Override
+            public void run() {
+            	mActivity.updateArchivingStatus(true);
+            }
+        }, 0);	
+	}
+
+	@Override
+	public void archiveStatusChanged(Session session, String archiveId,
+			String archiveStatus) {
+		super.archiveStatusChanged(session, archiveId, archiveStatus);
+		
+		mHandler.postDelayed(new Runnable() {  
+            @Override
+            public void run() {
+            	mActivity.updateArchivingStatus(false);
+            }
+        }, 0);	
+	}
+
+	@Override
+	protected void onError(Session session, OpentokError error) {
+		super.onError(session, error);
+		 Toast.makeText(this.mContext, error.getMessage(), Toast.LENGTH_SHORT).show();
+	}
+
 }
