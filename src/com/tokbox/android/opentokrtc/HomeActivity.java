@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
-public class OpenTokRTC extends Activity
+public class HomeActivity extends Activity
 {
 	private static final String TAG = "opentokrtc";
 	  

@@ -13,6 +13,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,17 +30,18 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AlphaAnimation;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.opentok.android.OpenTokConfig;
 import com.tokbox.android.opentokrtc.fragments.PublisherControlFragment;
 import com.tokbox.android.opentokrtc.fragments.PublisherStatusFragment;
 import com.tokbox.android.opentokrtc.fragments.SubscriberControlFragment;
@@ -53,7 +55,8 @@ public class ChatRoomActivity extends Activity implements
 	public static final String ARG_ROOM_ID = "roomId";
 	public static final String ARG_USERNAME_ID = "usernameId";
 	private static final int ANIMATION_DURATION = 500;   
-	  
+	private static final String URL = "http://opentokrtc.com/";
+	
 	private String mRoomName;
 	protected Room mRoom;
 	private String mUsername = null;
@@ -66,6 +69,7 @@ public class ChatRoomActivity extends Activity implements
 	private ViewPager mPlayersView;	
 	private ImageView mLeftArrowImage;
 	private ImageView mRightArrowImage;	
+	private ImageButton mToHome;
 	
 	private RelativeLayout mSubscriberAudioOnlyView;
 	private RelativeLayout mMessageBox;
@@ -82,31 +86,27 @@ public class ChatRoomActivity extends Activity implements
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+	
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		// Stop screen from going to sleep
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-
 		setContentView(R.layout.room_layout);
-
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-				R.layout.custom_title);
-
+		
+		//set custom title bar
+      	ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayUseLogoEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowCustomEnabled(true);
+      
+        View cView = getLayoutInflater().inflate(R.layout.custom_title, null);
+        actionBar.setCustomView(cView);
+        
 		mMessageBox = (RelativeLayout) findViewById(R.id.messagebox);
-
-		Uri url = getIntent().getData();
-        if(url == null) {
-            mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
-            mUsername = getIntent().getStringExtra(ARG_USERNAME_ID);
-        } else {
-            mRoomName = url.getPathSegments().get(0);
-        }
-
-		mMessageEditText = (EditText) findViewById(R.id.message);
+     
+        mMessageEditText = (EditText) findViewById(R.id.message);
 
 		mPreview = (ViewGroup) findViewById(R.id.publisherview);
 
@@ -116,6 +116,17 @@ public class ChatRoomActivity extends Activity implements
 		
 		mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
 
+		Uri url = getIntent().getData();
+        if(url == null) {
+            mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
+            mUsername = getIntent().getStringExtra(ARG_USERNAME_ID);
+        } else {
+            mRoomName = url.getPathSegments().get(0);
+        }
+		
+        TextView title = (TextView) findViewById(R.id.title);
+        title.setText(mRoomName);
+	
 		if (savedInstanceState == null) {
 			initSubscriberFragment();
 			initPublisherFragment();
@@ -124,13 +135,19 @@ public class ChatRoomActivity extends Activity implements
 	      
         mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        
-        //enable OTKit logs
-       // OpenTokConfig.setOTKitLogs(true);
-        //enable bindings logs
-       // OpenTokConfig.setJNILogs(true);
-          
-		initializeRoom();
+      	initializeRoom();
+		
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case android.R.id.home:
+	            onBackPressed();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 	
 	@Override
@@ -297,7 +314,6 @@ public class ChatRoomActivity extends Activity implements
 	}
 
 	public void onClickTextChat(View v) {
-
 		if (mMessageBox.getVisibility() == View.GONE) {
 			mMessageBox.setVisibility(View.VISIBLE);
 		} else {
@@ -305,13 +321,22 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 
+	public void onClickShareLink(View v) {	
+		String roomUrl = URL + mRoomName;
+		String text = getString(R.string.sharingLink) + " " + roomUrl;
+		Intent sendIntent = new Intent();
+		sendIntent.setAction(Intent.ACTION_SEND);
+		sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+		sendIntent.setType("text/plain");
+		startActivity(sendIntent);
+	}
+	
 	public void onPublisherViewClick(View v) {
 		if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
 			mRoom.getmCurrentParticipant().getView()
 					.setOnClickListener(onPublisherUIClick);
 		}
 	}
-
 	
 	public void initPublisherFragment() {
 		mPublisherFragment = new PublisherControlFragment();
@@ -375,6 +400,17 @@ public class ChatRoomActivity extends Activity implements
 		finish();
 	}
 
+	private OnClickListener onBackListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent goHome = new Intent(Intent.ACTION_MAIN);
+	        goHome.setClass(ChatRoomActivity.this, HomeActivity.class);
+	        goHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        startActivity(goHome);
+	        onBackPressed();
+        }
+	};
+	
 	private OnClickListener onSubscriberUIClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {

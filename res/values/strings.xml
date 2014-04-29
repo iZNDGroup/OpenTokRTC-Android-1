@@ -15,8 +15,10 @@
     <string name="audioOnly">Audio only</string>
     <string name="send">send</string>
     <string name="chatStr">Text chat</string>
+    <string name="shareStr">Share link</string>
     <string name="archivingOn">Archiving on</string>
     <string name="archivingOff">Archiving off</string>
+    <string name="sharingLink">Please join me at</string>
   
 
 </resources>
