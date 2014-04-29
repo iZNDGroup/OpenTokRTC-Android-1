@@ -45,7 +45,7 @@ public class Room extends Session {
 	private String mPublisherName = null;
 	
 	// Interface
-	private ViewPager mParticipantsViewContainer;
+	protected ViewPager mParticipantsViewContainer;
 	private ViewGroup mPreview;
 	private TextView mMessageView;
 	private ScrollView mMessageScroll;
@@ -54,12 +54,14 @@ public class Room extends Session {
 	protected Publisher mPublisher;
 	protected Participant mCurrentParticipant;
 	protected int mCurrentPosition;
-
+	
 	// Players status
 	protected ArrayList<Participant> mParticipants = new ArrayList<Participant>();
 	HashMap<Stream, Participant> mParticipantStream = new HashMap<Stream, Participant>();
 	HashMap<String, Participant> mParticipantConnection = new HashMap<String, Participant>();
 
+	private Handler mHandler;
+	
 	protected PagerAdapter mPagerAdapter = new PagerAdapter() {
 
 		@Override
@@ -217,7 +219,8 @@ public class Room extends Session {
 		mParticipantConnection.put(stream.getConnection().getConnectionId(), p);
 		mPagerAdapter.notifyDataSetChanged();
 
-		presentText("\n" + p.getmName() + " has joined the chat");
+		presentText("\n" + p.getmName() + " has joined the chat");	
+		mActivity.showArrowsOnSubscriber();
 	}
 
 	@Override
@@ -228,9 +231,11 @@ public class Room extends Session {
 			mParticipantStream.remove(stream);
 			mParticipantConnection.remove(stream.getConnection().getConnectionId());
 			mPagerAdapter.notifyDataSetChanged();
-
+			
 			presentText("\n" + p.getmName() + " has left the chat");
+			mActivity.showArrowsOnSubscriber();
 		}
+		
 	}
 
 	@Override
@@ -332,6 +337,10 @@ public class Room extends Session {
 		return mCurrentPosition;
 	}
 	
+	public ViewPager getmParticipantsViewContainer() {
+		return mParticipantsViewContainer;
+	}
+	
     @Override
     public void onPause() {
         super.onPause();
@@ -340,7 +349,6 @@ public class Room extends Session {
         }
     }
 
-    Handler mHandler;
     @Override
     public void onResume() {
         super.onResume();

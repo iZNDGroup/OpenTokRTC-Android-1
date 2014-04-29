@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,10 +33,8 @@ import android.view.View.OnClickListener;
 import android.view.animation.AlphaAnimation;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -69,7 +68,6 @@ public class ChatRoomActivity extends Activity implements
 	private ViewPager mPlayersView;	
 	private ImageView mLeftArrowImage;
 	private ImageView mRightArrowImage;	
-	private ImageButton mToHome;
 	
 	private RelativeLayout mSubscriberAudioOnlyView;
 	private RelativeLayout mMessageBox;
@@ -140,6 +138,17 @@ public class ChatRoomActivity extends Activity implements
 	}
 	
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+
+		// Remove publisher & subscriber views because we want to reuse them
+		if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
+			mRoom.getmParticipantsViewContainer().removeView(mRoom.getmCurrentParticipant().getView());
+		}
+		reloadInterface();
+	}
+	
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
 	        case android.R.id.home:
@@ -156,6 +165,10 @@ public class ChatRoomActivity extends Activity implements
 
 		if (mRoom != null) {
 			mRoom.onPause();
+			
+			if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
+				mRoom.getmParticipantsViewContainer().removeView(mRoom.getmCurrentParticipant().getView());
+			}
 		}
 		mNotifyBuilder = new NotificationCompat.Builder(this)
         .setContentTitle("OpenTokRTC")
@@ -187,6 +200,8 @@ public class ChatRoomActivity extends Activity implements
         if (mRoom != null) {
         	mRoom.onResume();
         }
+        
+        reloadInterface();
 	}
 
 	@Override
@@ -210,6 +225,16 @@ public class ChatRoomActivity extends Activity implements
 		super.onBackPressed();
 	}
 	
+	public void reloadInterface() {
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
+					mRoom.getmParticipantsViewContainer().addView(mRoom.getmCurrentParticipant().getView());
+				}
+			}
+		}, 500);
+	}
 	private void initializeRoom() {
 		Log.i(LOGTAG, "initializing chat room fragment for room: " + mRoomName);
 		setTitle(mRoomName);
@@ -399,17 +424,6 @@ public class ChatRoomActivity extends Activity implements
 		}
 		finish();
 	}
-
-	private OnClickListener onBackListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			Intent goHome = new Intent(Intent.ACTION_MAIN);
-	        goHome.setClass(ChatRoomActivity.this, HomeActivity.class);
-	        goHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	        startActivity(goHome);
-	        onBackPressed();
-        }
-	};
 	
 	private OnClickListener onSubscriberUIClick = new OnClickListener() {
 		@Override

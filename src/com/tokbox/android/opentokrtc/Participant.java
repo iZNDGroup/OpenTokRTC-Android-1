@@ -20,9 +20,7 @@ public class Participant extends Subscriber {
     
 	public Participant(Context context, Stream stream) {
         super(context, stream, null);
-        // With the userId we can query our own database
-        // to extract player information
-        // this.name = "Guest-" + (this.myConnectionId.substring(this.myConnectionId.length - 8, this.myConnectionId.length));
+    
         this.mContext = context;
         this.mActivity = (ChatRoomActivity) this.mContext;
         setmName("User" + ((int)(Math.random()*1000)));
