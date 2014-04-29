@@ -31,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
                 android:visibility="gone"
                 android:src="@drawable/arrow_left" 
                 android:onClick="lastParticipant">
@@ -42,6 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
                 android:visibility="gone"
                 android:src="@drawable/arrow_right"
                 android:onClick="nextParticipant"> 

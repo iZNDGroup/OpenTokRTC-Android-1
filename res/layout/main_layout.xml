@@ -45,7 +45,6 @@
             android:text="@string/button_join_room"
             android:background="@color/white"
             android:onClick="joinRoom" />
-        
     </RelativeLayout>
 
     <TextView android:id="@+id/introText"
