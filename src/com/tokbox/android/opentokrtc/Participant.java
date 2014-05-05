@@ -19,7 +19,7 @@ public class Participant extends Subscriber {
     private ChatRoomActivity mActivity;
     
 	public Participant(Context context, Stream stream) {
-        super(context, stream, null);
+        super(context, stream);
     
         this.mContext = context;
         this.mActivity = (ChatRoomActivity) this.mContext;

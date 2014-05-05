@@ -128,7 +128,7 @@ public class Room extends Session {
 	};
 
 	public Room(Context context, String roomName, String sessionId, String token, String apiKey, String username) {
-		super(context, apiKey, sessionId, null);
+		super(context, apiKey, sessionId);
 		this.apikey = apiKey;
 		this.sessionId = sessionId;
 		this.token = token;
@@ -136,6 +136,7 @@ public class Room extends Session {
 		this.mPublisherName = username;
 		this.mHandler = new Handler(context.getMainLooper());
 		this.mActivity = (ChatRoomActivity) this.mContext;
+		
 	}
 
 	// public methods
@@ -176,7 +177,7 @@ public class Room extends Session {
 	// callbacks
 	@Override
 	protected void onConnected(Session session) {
-		Publisher p = new Publisher(mContext, null, "Android");
+		Publisher p = new Publisher(mContext, "Android");
 		mPublisher = p;
 		mPublisher.setName(mPublisherName);
 		publish(p);
@@ -192,9 +193,9 @@ public class Room extends Session {
 				BaseVideoRenderer.STYLE_VIDEO_FILL);
 
 		presentText("Welcome to OpenTokRTC by TokBox. \n");
-		
-		sendChatMessage("/nick " + mPublisherName);
-
+		if (mPublisherName != null && !mPublisherName.isEmpty()) {
+			sendChatMessage("/nick " + mPublisherName);
+		}
 	}
 
 	@Override
