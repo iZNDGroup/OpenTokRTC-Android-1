@@ -95,7 +95,7 @@ public class ChatRoomActivity extends Activity implements
 
 		setContentView(R.layout.room_layout);
 		
-		//set custom title bar
+		//Custom title bar
       	ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayUseLogoEnabled(false);
@@ -141,7 +141,7 @@ public class ChatRoomActivity extends Activity implements
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 
-		// Remove publisher & subscriber views because we want to reuse them
+		// Removes publisher & subscriber views because we want to reuse them
 		if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
 			mRoom.getmParticipantsViewContainer().removeView(mRoom.getmCurrentParticipant().getView());
 		}
@@ -172,7 +172,7 @@ public class ChatRoomActivity extends Activity implements
 			}
 		}
 		
-		//Add notification to status bar
+		//Adds notification to status bar
 		mNotifyBuilder = new NotificationCompat.Builder(this)
         .setContentTitle("OpenTokRTC")
         .setContentText("Ongoing call")
@@ -313,7 +313,7 @@ public class ChatRoomActivity extends Activity implements
 		protected void initializeGetRequest(String room) {
 			URI roomURI;
 			URL url;
-			// TODO: construct urlStr from injectable values for testing
+			
 			String urlStr = "https://opentokrtc.com/" + room + ".json";
 			try {
 				url = new URL(urlStr);
@@ -329,9 +329,6 @@ public class ChatRoomActivity extends Activity implements
 						"the room URI is malformed: " + exception.getMessage());
 				return;
 			}
-			// TODO: check if alternate constructor will escape invalid
-			// characters properly, might be able to avoid all above code in
-			// this method
 			mHttpGet = new HttpGet(roomURI);
 		}
 	}
@@ -381,6 +378,7 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 	
+	//Initializes fragments
 	public void initPublisherFragment() {
 		mPublisherFragment = new PublisherControlFragment();
 		getFragmentManager().beginTransaction()
@@ -404,14 +402,19 @@ public class ChatRoomActivity extends Activity implements
 		return mRoom;
 	}
 
-	public void setmHandler(Handler mHandler) {
-		this.mHandler = mHandler;
-	}
-
 	public Handler getmHandler() {
 		return this.mHandler;
 	}
+	
+	public void setmHandler(Handler mHandler) {
+		this.mHandler = mHandler;
+	}
+	
+	public PublisherControlFragment getmPublisherFragment() {
+		return mPublisherFragment;
+	}
 
+	//callbacks
 	@Override
 	public void onMuteSubscriber() {
 		if (mRoom.getmCurrentParticipant() != null) {
@@ -443,6 +446,44 @@ public class ChatRoomActivity extends Activity implements
 		finish();
 	}
 	
+	@Override
+	public void onStatusPubBar() {
+		setPublisherMargins();
+	}
+	
+	@Override
+	public void onStatusSubBar() {
+		showArrowsOnSubscriber();	
+	}
+	
+	//Adjusts publisher view if its control bar is hidden
+	public void setPublisherMargins(){
+		int bottomMargin = 0;
+		RelativeLayout.LayoutParams params = (LayoutParams) mPreview
+				.getLayoutParams();
+		RelativeLayout.LayoutParams pubControlLayoutParams = (LayoutParams) mPublisherFragment
+				.getmPublisherContainer().getLayoutParams();
+		RelativeLayout.LayoutParams pubStatusLayoutParams = (LayoutParams) mPublisherStatusFragment
+				.getMPubStatusContainer().getLayoutParams();
+
+		if (mPublisherFragment.ismPublisherWidgetVisible() && mArchiving) {
+			bottomMargin = pubControlLayoutParams.height
+					+ pubStatusLayoutParams.height + dpToPx(20);
+		}
+		else {
+			if (mPublisherFragment.ismPublisherWidgetVisible()) {
+				bottomMargin = pubControlLayoutParams.height + dpToPx(20);
+			} else {	
+				params.addRule(RelativeLayout.ALIGN_BOTTOM);
+				bottomMargin = dpToPx(20);
+			}
+		}
+		params.bottomMargin = bottomMargin;
+		params.leftMargin = dpToPx(20);
+		mPreview.setLayoutParams(params);
+	}
+	
+	//OnClickListeners to show/hide the control bars for publisher and subscribers
 	private OnClickListener onSubscriberUIClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -475,45 +516,9 @@ public class ChatRoomActivity extends Activity implements
             }
         }
 	};
-	
-	@Override
-	public void onStatusPubBar() {
-		setPublisherMargins();
-	}
-	
-	@Override
-	public void onStatusSubBar() {
-		showArrowsOnSubscriber();	
-	}
-	
-	public void setPublisherMargins(){
-		int bottomMargin = 0;
-		RelativeLayout.LayoutParams params = (LayoutParams) mPreview
-				.getLayoutParams();
-		RelativeLayout.LayoutParams pubControlLayoutParams = (LayoutParams) mPublisherFragment
-				.getmPublisherContainer().getLayoutParams();
-		RelativeLayout.LayoutParams pubStatusLayoutParams = (LayoutParams) mPublisherStatusFragment
-				.getMPubStatusContainer().getLayoutParams();
 
-		if (mPublisherFragment.ismPublisherWidgetVisible() && mArchiving) {
-			bottomMargin = pubControlLayoutParams.height
-					+ pubStatusLayoutParams.height + dpToPx(20);
-		}
-		else {
-			if (mPublisherFragment.ismPublisherWidgetVisible()) {
-				bottomMargin = pubControlLayoutParams.height + dpToPx(20);
-			} else {	
-				params.addRule(RelativeLayout.ALIGN_BOTTOM);
-				bottomMargin = dpToPx(20);
-			}
-		}
-		params.bottomMargin = bottomMargin;
-		params.leftMargin = dpToPx(20);
-		mPreview.setLayoutParams(params);
-	}
-	
+	//Shows next and last arrow on subscriber view if the number of subscribers is higher than 1
 	public void showArrowsOnSubscriber(){
-		
 		boolean show = false;
 		if (mRoom.getmParticipants().size() > 1 ) {
 	        	if (mLeftArrowImage.getVisibility() == View.GONE) {
@@ -532,8 +537,7 @@ public class ChatRoomActivity extends Activity implements
 	    		mRightArrowImage.startAnimation(aa);	    		
 		}
 		
-		//show subscriber views arrows
-        if (show) {
+		if (show) {
         	mLeftArrowImage.setVisibility(View.VISIBLE);
         	mRightArrowImage.setVisibility(View.VISIBLE);
         }
@@ -553,10 +557,7 @@ public class ChatRoomActivity extends Activity implements
 		mPlayersView.setCurrentItem(nextPosition);
 	}
 	
-	public PublisherControlFragment getmPublisherFragment() {
-		return mPublisherFragment;
-	}
-	
+	//Shows audio only icon when video quality changed and it is disabled for the subscriber
 	public void setAudioOnlyView(boolean audioOnlyEnabled) {
 		mSubscriberVideoOnly = audioOnlyEnabled;
 
@@ -580,6 +581,7 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 	
+	//Updates publisher status bar when archiving stars/stops
 	public void updateArchivingStatus(boolean archiving) {
 		mPublisherFragment.showPublisherWidget(false);
 		mArchiving = archiving;
@@ -600,11 +602,8 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 	
-	/**
-     * Converts dp to real pixels, according to the screen density.
-     * @param dp A number of density-independent pixels.
-     * @return The equivalent number of real pixels.
-     */
+	
+    //Converts dp to real pixels, according to the screen density.
     public int dpToPx(int dp) {
         double screenDensity = this.getResources().getDisplayMetrics().density;
         return (int) (screenDensity * (double) dp);
