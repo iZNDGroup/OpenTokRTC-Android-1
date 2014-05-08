@@ -2,9 +2,6 @@ package com.tokbox.android.opentokrtc.fragments;
 
 import com.tokbox.android.opentokrtc.ChatRoomActivity;
 import com.tokbox.android.opentokrtc.R;
-import com.tokbox.android.opentokrtc.R.drawable;
-import com.tokbox.android.opentokrtc.R.id;
-import com.tokbox.android.opentokrtc.R.layout;
 
 import android.app.Activity;
 import android.app.Fragment;

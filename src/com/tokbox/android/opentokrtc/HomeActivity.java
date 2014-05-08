@@ -11,7 +11,7 @@ import android.widget.EditText;
 
 public class HomeActivity extends Activity
 {
-	private static final String TAG = "opentokrtc";
+	private static final String LOGTAG = "opentokrtc";
 	private static final String LAST_CONFERENCE_DATA = "LAST_CONFERENCE_DATA";
 	
 	private String roomName;
@@ -41,7 +41,7 @@ public class HomeActivity extends Activity
     }
 
     public void joinRoom(View v) {
-        Log.i(TAG, "join room button clicked.");
+        Log.i(LOGTAG, "join room button clicked.");
 
         roomName = roomNameInput.getText().toString();
         username = usernameInput.getText().toString();

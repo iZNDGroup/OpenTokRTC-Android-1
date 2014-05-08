@@ -139,7 +139,6 @@ public class Room extends Session {
 		
 	}
 
-	// public methods
 	public void setPlayersViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
         this.mParticipantsViewContainer = container;
         this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
@@ -157,7 +156,6 @@ public class Room extends Session {
 	}
 
 	public void connect() {
-		//this.connect(token);
 		this.connect(token);
 	}
 
@@ -169,11 +167,49 @@ public class Room extends Session {
             sendSignal("chat", json.toString());
             presentMessage("Me", message);
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+              e.printStackTrace();
         }	    
 	}
 
+	public Publisher getmPublisher() {
+		return mPublisher;
+	}
+
+	public Participant getmCurrentParticipant() {
+		return mCurrentParticipant;
+	}
+
+	public ArrayList<Participant> getmParticipants() {
+		return mParticipants;
+	}
+
+	public PagerAdapter getmPagerAdapter() {
+		return mPagerAdapter;
+	}
+
+	public int getmCurrentPosition() {
+		return mCurrentPosition;
+	}
+	
+	public ViewPager getmParticipantsViewContainer() {
+		return mParticipantsViewContainer;
+	}
+	
+	private void presentMessage(String who, String message) {
+		presentText("\n" + who + ": " + message);
+	}
+
+	private void presentText(String message) {
+		mMessageView.setText(mMessageView.getText() + message);
+		mMessageScroll.post(new Runnable() {
+			@Override
+			public void run() {
+				int totalHeight = mMessageView.getHeight();
+				mMessageScroll.smoothScrollTo(0, totalHeight);
+			}
+		});
+	}
+	
 	// callbacks
 	@Override
 	protected void onConnected(Session session) {
@@ -300,49 +336,9 @@ public class Room extends Session {
                     e.printStackTrace();
                 }
             }
-        
-	}
-
-	private void presentMessage(String who, String message) {
-		presentText("\n" + who + ": " + message);
-	}
-
-	private void presentText(String message) {
-		mMessageView.setText(mMessageView.getText() + message);
-		mMessageScroll.post(new Runnable() {
-			@Override
-			public void run() {
-				int totalHeight = mMessageView.getHeight();
-				mMessageScroll.smoothScrollTo(0, totalHeight);
-			}
-		});
 	}
 	
-	public Publisher getmPublisher() {
-		return mPublisher;
-	}
-
-	public Participant getmCurrentParticipant() {
-		return mCurrentParticipant;
-	}
-
-	public ArrayList<Participant> getmParticipants() {
-		return mParticipants;
-	}
-
-	public PagerAdapter getmPagerAdapter() {
-		return mPagerAdapter;
-	}
-
-	public int getmCurrentPosition() {
-		return mCurrentPosition;
-	}
-	
-	public ViewPager getmParticipantsViewContainer() {
-		return mParticipantsViewContainer;
-	}
-	
-    @Override
+	@Override
     public void onPause() {
         super.onPause();
         if(mPublisher != null) {
@@ -410,5 +406,5 @@ public class Room extends Session {
 		super.onError(session, error);
 		 Toast.makeText(this.mContext, error.getMessage(), Toast.LENGTH_SHORT).show();
 	}
-
+	
 }

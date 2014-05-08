@@ -15,10 +15,12 @@ import org.json.JSONObject;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -50,10 +52,10 @@ public class ChatRoomActivity extends Activity implements
 		PublisherControlFragment.PublisherCallbacks {
 
 	private static final int NOTIFICATION_ID = 1;
-	public static final String LOGTAG = "ChatRoomActivity";
+	private static final String LOGTAG = "ChatRoomActivity";
+	private static final int ANIMATION_DURATION = 500;   
 	public static final String ARG_ROOM_ID = "roomId";
 	public static final String ARG_USERNAME_ID = "usernameId";
-	private static final int ANIMATION_DURATION = 500;   
 	private static final String URL = "http://opentokrtc.com/";
 	
 	private String mRoomName;
@@ -63,6 +65,7 @@ public class ChatRoomActivity extends Activity implements
 	private boolean mArchiving = false;
 	
 	private ProgressDialog mConnectingDialog;
+	private AlertDialog mErrorDialog;
 	private EditText mMessageEditText;
 	private ViewGroup mPreview;
 	private ViewPager mPlayersView;	
@@ -103,15 +106,12 @@ public class ChatRoomActivity extends Activity implements
         actionBar.setCustomView(cView);
         
 		mMessageBox = (RelativeLayout) findViewById(R.id.messagebox);
-     
-        mMessageEditText = (EditText) findViewById(R.id.message);
+		mMessageEditText = (EditText) findViewById(R.id.message);
 
 		mPreview = (ViewGroup) findViewById(R.id.publisherview);
-
 		mPlayersView = (ViewPager) findViewById(R.id.pager);
 		mLeftArrowImage = (ImageView) findViewById(R.id.left_arrow);
 		mRightArrowImage = (ImageView) findViewById(R.id.right_arrow);
-		
 		mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
 
 		Uri url = getIntent().getData();
@@ -162,7 +162,8 @@ public class ChatRoomActivity extends Activity implements
 	@Override
 	public void onPause() {
 		super.onPause();
-
+		
+		//Pause implies go to audio only mode
 		if (mRoom != null) {
 			mRoom.onPause();
 			
@@ -170,6 +171,8 @@ public class ChatRoomActivity extends Activity implements
 				mRoom.getmParticipantsViewContainer().removeView(mRoom.getmCurrentParticipant().getView());
 			}
 		}
+		
+		//Add notification to status bar
 		mNotifyBuilder = new NotificationCompat.Builder(this)
         .setContentTitle("OpenTokRTC")
         .setContentText("Ongoing call")
@@ -181,8 +184,7 @@ public class ChatRoomActivity extends Activity implements
 	    PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 	    
 	    mNotifyBuilder.setContentIntent(intent);
-		
-        mNotificationManager.notify(
+		mNotificationManager.notify(
                 NOTIFICATION_ID,
                 mNotifyBuilder.build());
 	}
@@ -191,6 +193,7 @@ public class ChatRoomActivity extends Activity implements
 	public void onResume() {
 		super.onResume();
 
+		//Resume implies restore video mode if it was enable before pausing app
 		if (mRoom != null) {
 			mRoom.onResume();
 		}
@@ -209,8 +212,7 @@ public class ChatRoomActivity extends Activity implements
 		super.onStop();
 
 		if(this.isFinishing()) {
-	        mNotificationManager.cancel(NOTIFICATION_ID);
-	        
+	        mNotificationManager.cancel(NOTIFICATION_ID); 
             if (mRoom != null) {
             	mRoom.disconnect();
             }
@@ -235,6 +237,7 @@ public class ChatRoomActivity extends Activity implements
 			}
 		}, 500);
 	}
+	
 	private void initializeRoom() {
 		Log.i(LOGTAG, "initializing chat room fragment for room: " + mRoomName);
 		setTitle(mRoomName);
@@ -289,7 +292,6 @@ public class ChatRoomActivity extends Activity implements
 
 		@Override
 		protected void onPostExecute(final Room room) {
-			// TODO: it might be better to set up some kind of callback
 			// interface
 			if (mDidCompleteSuccessfully) {
 				mConnectingDialog.dismiss();
@@ -300,10 +302,11 @@ public class ChatRoomActivity extends Activity implements
 				mRoom.setMessageView((TextView) findViewById(R.id.messageView),
 						(ScrollView) findViewById(R.id.scroller));
 				mRoom.connect();
+				
 			} else {
 				mConnectingDialog.dismiss();
 				mConnectingDialog = null;
-				// TODO: show failure dialog
+				showErrorDialog();
 			}
 		}
 
@@ -333,6 +336,21 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 
+	private DialogInterface.OnClickListener errorListener = new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int id) {
+			finish();
+		}
+	};
+	
+	private void showErrorDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Error");
+		builder.setMessage("The session failed to connect");
+		builder.setCancelable(false);
+		builder.setPositiveButton("OK", errorListener);
+		builder.show();
+	}
+	
 	public void onClickSend(View v) {
 		mRoom.sendChatMessage(mMessageEditText.getText().toString());
 		mMessageEditText.setText("");
