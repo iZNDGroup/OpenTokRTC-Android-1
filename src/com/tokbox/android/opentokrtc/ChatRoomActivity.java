@@ -64,6 +64,7 @@ public class ChatRoomActivity extends Activity implements
 	private boolean mSubscriberVideoOnly = false;
 	private boolean mArchiving = false;
 	
+	//Interface
 	private ProgressDialog mConnectingDialog;
 	private AlertDialog mErrorDialog;
 	private EditText mMessageEditText;
@@ -75,7 +76,7 @@ public class ChatRoomActivity extends Activity implements
 	private RelativeLayout mSubscriberAudioOnlyView;
 	private RelativeLayout mMessageBox;
 	
-	// Fragments
+	//Fragments
 	protected SubscriberControlFragment mSubscriberFragment;
 	protected PublisherControlFragment mPublisherFragment;
 	protected PublisherStatusFragment mPublisherStatusFragment;
@@ -141,7 +142,7 @@ public class ChatRoomActivity extends Activity implements
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 
-		// Removes publisher & subscriber views because we want to reuse them
+		// Remove publisher & subscriber views because we want to reuse them
 		if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
 			mRoom.getmParticipantsViewContainer().removeView(mRoom.getmCurrentParticipant().getView());
 		}
@@ -172,7 +173,7 @@ public class ChatRoomActivity extends Activity implements
 			}
 		}
 		
-		//Adds notification to status bar
+		//Add notification to status bar
 		mNotifyBuilder = new NotificationCompat.Builder(this)
         .setContentTitle("OpenTokRTC")
         .setContentText("Ongoing call")
@@ -221,10 +222,12 @@ public class ChatRoomActivity extends Activity implements
 	
 	@Override
 	public void onBackPressed() {
+		super.onBackPressed();
+		
 		if (mRoom != null) {
 			mRoom.disconnect();
 		}
-		super.onBackPressed();
+		
 	}
 	
 	public void reloadInterface() {
@@ -242,7 +245,7 @@ public class ChatRoomActivity extends Activity implements
 		Log.i(LOGTAG, "initializing chat room fragment for room: " + mRoomName);
 		setTitle(mRoomName);
 
-		// show connecting dialog
+		//Show connecting dialog
 		mConnectingDialog = new ProgressDialog(this);
 		mConnectingDialog.setTitle("Joining Room...");
 		mConnectingDialog.setMessage("Please wait.");
@@ -292,17 +295,15 @@ public class ChatRoomActivity extends Activity implements
 
 		@Override
 		protected void onPostExecute(final Room room) {
-			// interface
 			if (mDidCompleteSuccessfully) {
 				mConnectingDialog.dismiss();
 				mRoom = room;
 				mPreview.setOnClickListener(onPublisherUIClick);
 				mRoom.setPreviewView(mPreview);
-				mRoom.setPlayersViewContainer(mPlayersView, onSubscriberUIClick);
+				mRoom.setParticipantsViewContainer(mPlayersView, onSubscriberUIClick);
 				mRoom.setMessageView((TextView) findViewById(R.id.messageView),
 						(ScrollView) findViewById(R.id.scroller));
 				mRoom.connect();
-				
 			} else {
 				mConnectingDialog.dismiss();
 				mConnectingDialog = null;
@@ -341,11 +342,12 @@ public class ChatRoomActivity extends Activity implements
 	
 	private void showErrorDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Error");
-		builder.setMessage("The session failed to connect");
+		builder.setTitle(R.string.error_title);
+		builder.setMessage(R.string.error);
 		builder.setCancelable(false);
 		builder.setPositiveButton("OK", errorListener);
-		builder.show();
+		mErrorDialog = builder.create();
+		mErrorDialog.show();
 	}
 	
 	public void onClickSend(View v) {
@@ -378,7 +380,7 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 	
-	//Initializes fragments
+	//Initialize fragments
 	public void initPublisherFragment() {
 		mPublisherFragment = new PublisherControlFragment();
 		getFragmentManager().beginTransaction()
@@ -414,7 +416,7 @@ public class ChatRoomActivity extends Activity implements
 		return mPublisherFragment;
 	}
 
-	//callbacks
+	//Callbacks
 	@Override
 	public void onMuteSubscriber() {
 		if (mRoom.getmCurrentParticipant() != null) {
@@ -456,7 +458,7 @@ public class ChatRoomActivity extends Activity implements
 		showArrowsOnSubscriber();	
 	}
 	
-	//Adjusts publisher view if its control bar is hidden
+	//Adjust publisher view if its control bar is hidden
 	public void setPublisherMargins(){
 		int bottomMargin = 0;
 		RelativeLayout.LayoutParams params = (LayoutParams) mPreview
@@ -517,7 +519,7 @@ public class ChatRoomActivity extends Activity implements
         }
 	};
 
-	//Shows next and last arrow on subscriber view if the number of subscribers is higher than 1
+	//Show next and last arrow on subscriber view if the number of subscribers is higher than 1
 	public void showArrowsOnSubscriber(){
 		boolean show = false;
 		if (mRoom.getmParticipants().size() > 1 ) {
@@ -557,7 +559,7 @@ public class ChatRoomActivity extends Activity implements
 		mPlayersView.setCurrentItem(nextPosition);
 	}
 	
-	//Shows audio only icon when video quality changed and it is disabled for the subscriber
+	//Show audio only icon when video quality changed and it is disabled for the subscriber
 	public void setAudioOnlyView(boolean audioOnlyEnabled) {
 		mSubscriberVideoOnly = audioOnlyEnabled;
 
@@ -581,7 +583,7 @@ public class ChatRoomActivity extends Activity implements
 		}
 	}
 	
-	//Updates publisher status bar when archiving stars/stops
+	//Update publisher status bar when archiving stars/stops
 	public void updateArchivingStatus(boolean archiving) {
 		mPublisherFragment.showPublisherWidget(false);
 		mArchiving = archiving;
@@ -603,7 +605,7 @@ public class ChatRoomActivity extends Activity implements
 	}
 	
 	
-    //Converts dp to real pixels, according to the screen density.
+    //Convert dp to real pixels, according to the screen density.
     public int dpToPx(int dp) {
         double screenDensity = this.getResources().getDisplayMetrics().density;
         return (int) (screenDensity * (double) dp);

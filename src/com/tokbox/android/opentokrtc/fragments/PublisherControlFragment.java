@@ -24,15 +24,16 @@ public class PublisherControlFragment extends Fragment implements
     private static final int ANIMATION_DURATION = 500;
     private static final int PUBLISHER_CONTROLS_DURATION = 7000;
   
-    protected boolean mPublisherWidgetVisible = false;
-	private ImageButton mPublisherMute;
+    //Interface
+    private ImageButton mPublisherMute;
     private ImageButton mSwapCamera;
     private Button mEndCall;
-
+    protected RelativeLayout mPublisherContainer;
+    
     private PublisherCallbacks mCallbacks = sOpenTokCallbacks;
     private ChatRoomActivity chatRoomActivity;
-    
-    protected RelativeLayout mPublisherContainer;
+    protected boolean mPublisherWidgetVisible = false;
+	
     
     public interface PublisherCallbacks {
         public void onMutePublisher();
@@ -72,7 +73,7 @@ public class PublisherControlFragment extends Fragment implements
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        Log.i(LOGTAG, "onAttach");
+        Log.i(LOGTAG, "On attach Publisher control fragment");
         chatRoomActivity = (ChatRoomActivity) activity;
         if (!(activity instanceof PublisherCallbacks)) {
             throw new IllegalStateException(
@@ -113,42 +114,6 @@ public class PublisherControlFragment extends Fragment implements
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Log.i(LOGTAG, "onStart");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.i(LOGTAG, "onResume");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.i(LOGTAG, "onPause");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.i(LOGTAG, "onStop");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.i(LOGTAG, "onDestroyView");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i(LOGTAG, "onDestroy");
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         Log.i(LOGTAG, "onDetach");
@@ -170,7 +135,6 @@ public class PublisherControlFragment extends Fragment implements
         case R.id.endCall:
             endCall();
             break;
-
         }
     }
 
@@ -193,6 +157,7 @@ public class PublisherControlFragment extends Fragment implements
                 .getPublishAudio() ? R.drawable.unmute_pub : R.drawable.mute_pub);
     }
 
+    //Initialize publisher control bar: mute/unmute, endCall and swap camera buttons
     public void initPublisherUI() {
     	chatRoomActivity.getmHandler().removeCallbacks(
                 mPublisherWidgetTimerTask);
@@ -213,7 +178,8 @@ public class PublisherControlFragment extends Fragment implements
     public void showPublisherWidget(boolean show) {
     	showPublisherWidget(show, true);
     }
-
+    
+    //Set animation to show and hide the publisher control bar
     private void showPublisherWidget(boolean show, boolean animate) {
     	mPublisherContainer.clearAnimation();
 		mPublisherWidgetVisible = show;
@@ -230,8 +196,7 @@ public class PublisherControlFragment extends Fragment implements
 		}
     }
    
-    public void publisherClick() {
-    	
+    public void publisherClick() { 	
     	if (!mPublisherWidgetVisible) {
 			showPublisherWidget(true);
 		} else {

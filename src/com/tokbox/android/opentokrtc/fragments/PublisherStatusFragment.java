@@ -20,17 +20,18 @@ import android.widget.TextView;
 public class PublisherStatusFragment extends Fragment {
 
 	private static final String LOGTAG = "demo-UI-pub-status-fragment";
+	// Animation constants
 	private static final int ANIMATION_DURATION = 500;
 	private static final int STATUS_ANIMATION_DURATION = 7000;
 
+	//Interface
 	private ImageButton archiving;
 	private TextView statusText;
+	protected RelativeLayout mPubStatusContainer;
+	
 	private ChatRoomActivity chatRoomActivity;
 	protected boolean mPubStatusWidgetVisible = false;
-
 	protected boolean mArchiving = false;
-
-	protected RelativeLayout mPubStatusContainer;
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -38,7 +39,6 @@ public class PublisherStatusFragment extends Fragment {
 
 		Log.i(LOGTAG, "On attach Publisher status fragment");
 		chatRoomActivity = (ChatRoomActivity) activity;
-		
 	}
 
 	@Override
@@ -74,41 +74,19 @@ public class PublisherStatusFragment extends Fragment {
 	}
 
 	@Override
-	public void onStart() {
-		super.onStart();
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-	}
-
-	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-	}
-
-	@Override
 	public void onDetach() {
 		super.onDetach();
 		Log.i(LOGTAG, "On detach Publisher status fragment");
 	}
 
+	//Initialize publisher status bar
+	public void initPubStatusUI() {
+		chatRoomActivity.getmHandler()
+					.removeCallbacks(mPubStatusWidgetTimerTask);
+		chatRoomActivity.getmHandler().postDelayed(mPubStatusWidgetTimerTask,
+					STATUS_ANIMATION_DURATION);
+	}
+	
 	private Runnable mPubStatusWidgetTimerTask = new Runnable() {
 		@Override
 		public void run() {
@@ -120,7 +98,8 @@ public class PublisherStatusFragment extends Fragment {
 	public void showPubStatusWidget(boolean show) {
 		showPubStatusWidget(show, true);
 	}
-
+	
+	//Set animation to show and hide the publisher status bar  
 	private void showPubStatusWidget(boolean show, boolean animate) {
 		mPubStatusContainer.clearAnimation();
 		mPubStatusWidgetVisible = show;
@@ -146,14 +125,8 @@ public class PublisherStatusFragment extends Fragment {
 
 		initPubStatusUI();
 	}
-
-	public void initPubStatusUI() {
-		chatRoomActivity.getmHandler()
-				.removeCallbacks(mPubStatusWidgetTimerTask);
-		chatRoomActivity.getmHandler().postDelayed(mPubStatusWidgetTimerTask,
-				STATUS_ANIMATION_DURATION);
-	}
-
+	
+	//Update archiving status icon
 	public void updateArchivingUI(boolean archivingOn) {
 		archiving = (ImageButton) chatRoomActivity.findViewById(R.id.archiving);
 		this.mArchiving = archivingOn;

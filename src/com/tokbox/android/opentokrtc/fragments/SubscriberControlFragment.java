@@ -19,15 +19,15 @@ public class SubscriberControlFragment extends Fragment implements
         View.OnClickListener {
 
     private static final String LOGTAG = "demo-UI-sub-control-fragment";
+    // Animation constants
+    private static final int ANIMATION_DURATION = 500;
+    private static final int SUBSCRIBER_CONTROLS_DURATION = 7000;
 
+    //Interface
     private boolean mSubscriberWidgetVisible = false;
     private ImageButton mSubscriberMute;
     private TextView mSubscriberName;
     private RelativeLayout mSubContainer;
-
-    // Animation constants
-    private static final int ANIMATION_DURATION = 500;
-    private static final int SUBSCRIBER_CONTROLS_DURATION = 7000;
 
     private SubscriberCallbacks mCallbacks = sOpenTokCallbacks;
     private ChatRoomActivity chatRoomActivity;
@@ -43,8 +43,7 @@ public class SubscriberControlFragment extends Fragment implements
         public void onMuteSubscriber() {
             return;
         }
-
-
+        
         @Override
         public void onStatusSubBar() {
             return;
@@ -54,7 +53,7 @@ public class SubscriberControlFragment extends Fragment implements
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Log.i(LOGTAG, "onAttach");
+        Log.i(LOGTAG, "On attach Subscriber control fragment");
 
         chatRoomActivity = (ChatRoomActivity) activity;
         if (!(activity instanceof SubscriberCallbacks)) {
@@ -95,42 +94,6 @@ public class SubscriberControlFragment extends Fragment implements
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Log.i(LOGTAG, "onStart");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.i(LOGTAG, "onResume");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.i(LOGTAG, "onPause");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.i(LOGTAG, "onStop");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.i(LOGTAG, "onDestroyView");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i(LOGTAG, "onDestroy");
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         Log.i(LOGTAG, "onDetach");
@@ -146,7 +109,22 @@ public class SubscriberControlFragment extends Fragment implements
             break;
         }
     }
-
+    
+    //Initialize subscriber status bar
+    public void initSubscriberUI() {
+     	chatRoomActivity.getmHandler().removeCallbacks(
+                 mSubscriberWidgetTimerTask);
+     	chatRoomActivity.getmHandler().postDelayed(mSubscriberWidgetTimerTask,
+                 SUBSCRIBER_CONTROLS_DURATION);
+         mSubscriberName.setText(chatRoomActivity.getmRoom().getmCurrentParticipant().getStream()
+                 .getName());
+    }
+    
+    public void initSubscriberWidget() {
+    	mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
+                 .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
+    }
+    
     private Runnable mSubscriberWidgetTimerTask = new Runnable() {
         @Override
         public void run() {
@@ -159,6 +137,7 @@ public class SubscriberControlFragment extends Fragment implements
         showSubscriberWidget(show, true);
     }
 
+    //Set animation to show and hide the subscriber control bar  
     private void showSubscriberWidget(boolean show, boolean animate) {
     	mSubContainer.clearAnimation();
 		mSubscriberWidgetVisible = show;
@@ -193,20 +172,6 @@ public class SubscriberControlFragment extends Fragment implements
     public void muteSubscriber() {
         mCallbacks.onMuteSubscriber();
 
-        mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
-                .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
-    }
-
-   public void initSubscriberUI() {
-    	chatRoomActivity.getmHandler().removeCallbacks(
-                mSubscriberWidgetTimerTask);
-    	chatRoomActivity.getmHandler().postDelayed(mSubscriberWidgetTimerTask,
-                SUBSCRIBER_CONTROLS_DURATION);
-        mSubscriberName.setText(chatRoomActivity.getmRoom().getmCurrentParticipant().getStream()
-                .getName());
-    }
-
-    public void initSubscriberWidget() {
         mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
                 .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
     }

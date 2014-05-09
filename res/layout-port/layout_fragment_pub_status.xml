@@ -11,7 +11,7 @@
         android:id="@+id/publisherStatusWidget"
         android:layout_width="fill_parent"
         android:layout_height="48dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true" >
    
         <ImageButton
             android:id="@+id/archiving"
@@ -57,8 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_alignParentTop="true"
-            android:background="@color/trans_white" />
-        
+            android:background="@color/trans_white" /> 
     </RelativeLayout>
     
 </RelativeLayout>

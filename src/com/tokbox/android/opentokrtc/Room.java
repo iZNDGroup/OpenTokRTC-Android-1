@@ -33,7 +33,7 @@ import com.opentok.android.Stream;
 
 public class Room extends Session {
    
-	public static final String TAG = "Room";
+	private static final String LOGTAG = "Room";
 
 	private Context mContext;
 	private ChatRoomActivity mActivity;
@@ -42,24 +42,22 @@ public class Room extends Session {
 	String sessionId;
 	String token;
 	
-	private String mPublisherName = null;
-	
-	// Interface
-	protected ViewPager mParticipantsViewContainer;
-	private ViewGroup mPreview;
-	private TextView mMessageView;
-	private ScrollView mMessageScroll;
-	private OnClickListener onSubscriberUIClick;
-	
 	protected Publisher mPublisher;
 	protected Participant mCurrentParticipant;
 	protected int mCurrentPosition;
+	private String mPublisherName = null;
 	
-	// Players status
-	protected ArrayList<Participant> mParticipants = new ArrayList<Participant>();
 	HashMap<Stream, Participant> mParticipantStream = new HashMap<Stream, Participant>();
 	HashMap<String, Participant> mParticipantConnection = new HashMap<String, Participant>();
 
+	//Interface
+	private ViewGroup mPreview;
+	private TextView mMessageView;
+	private ScrollView mMessageScroll;
+	protected ViewPager mParticipantsViewContainer;
+	protected ArrayList<Participant> mParticipants = new ArrayList<Participant>();
+	private OnClickListener onSubscriberUIClick;
+	
 	private Handler mHandler;
 	
 	protected PagerAdapter mPagerAdapter = new PagerAdapter() {
@@ -139,7 +137,7 @@ public class Room extends Session {
 		
 	}
 
-	public void setPlayersViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
+	public void setParticipantsViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
         this.mParticipantsViewContainer = container;
         this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
         this.onSubscriberUIClick = onSubscriberUIClick;
@@ -210,7 +208,33 @@ public class Room extends Session {
 		});
 	}
 	
-	// callbacks
+	//Callbacks
+	@Override
+    public void onPause() {
+        super.onPause();
+        if(mPublisher != null) {
+            mPreview.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mHandler.postDelayed(new Runnable() {
+            
+            @Override
+            public void run() {
+                if(mPublisher != null) {
+                    mPreview.setVisibility(View.VISIBLE);
+                    mPreview.removeView(mPublisher.getView());
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                    mPreview.addView(mPublisher.getView(), lp);
+                }
+            }
+        }, 500);
+    }
+	
 	@Override
 	protected void onConnected(Session session) {
 		Publisher p = new Publisher(mContext, "Android");
@@ -238,17 +262,17 @@ public class Room extends Session {
 	protected void onStreamReceived(Session session, Stream stream) {
 		Participant p = new Participant(mContext, stream);
 	
-		// we can use connection data to obtain each user id
+		//We can use connection data to obtain each user id
 		p.setmUserId(stream.getConnection().getData());
 
-		// Subscribe audio only if we have more than one player
+		//Subscribe to audio only if we have more than 1 subscribed participant
 		if (mParticipants.size() != 0) {
 			p.setSubscribeToVideo(false);
 		}
 
 		p.getView().setOnClickListener(this.onSubscriberUIClick);
 		
-		// Subscribe to this player
+		//Subscribe to this participant
 		this.subscribe(p);
 
 		mParticipants.add(p);
@@ -278,14 +302,14 @@ public class Room extends Session {
 	@Override
 	protected void onSignalReceived(Session session, String type, String data,
 			Connection connection) {
-	    Log.d(TAG, "Received signal:" + type + " data:" + data + "connection: " + connection);
+	    Log.d(LOGTAG, "Received signal:" + type + " data:" + data + "connection: " + connection);
         
 	    if (connection != null) {
 	    	String mycid = this.getConnection().getConnectionId();
         	String cid = connection.getConnectionId();
         	if (!cid.equals(mycid)) {
         		if ("chat".equals(type)) {
-        			// Text message
+        			//Text message
         			Participant p = mParticipantConnection.get(cid);
         			if (p != null) {
         				JSONObject json;
@@ -296,12 +320,11 @@ public class Room extends Session {
         					p.setmName(name);
         					presentMessage(p.getmName(), text);
         				} catch (JSONException e) {
-        					// TODO Auto-generated catch block
         					e.printStackTrace();
         				}
         			}
         		} else if("name".equals(type)) {
-        			// Name change message
+        			//Name change message
         			Participant p = mParticipantConnection.get(cid);
         			if (p != null) {
         				try {
@@ -311,7 +334,6 @@ public class Room extends Session {
         					p.setmName(name);
         					presentText("\n" + oldName + " is now known as " + name);
         				} catch (JSONException e) {
-        					// TODO Auto-generated catch block
         					e.printStackTrace();
         				}
         			}
@@ -323,48 +345,21 @@ public class Room extends Session {
                 try {
                     JSONObject json = new JSONObject(data);
                     JSONObject users = json.getJSONObject("users");
-                    Iterator<String> it = users.keys();
+                    Iterator<?> it = users.keys();
                     while(it.hasNext()) {
-                        String pcid = it.next();
+                        String pcid = (String) it.next();
                         Participant p = mParticipantConnection.get(pcid);
                         if (p != null) {
                             p.setmName(users.getString(pcid));
                         }
                     }
                 } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                     e.printStackTrace();
                 }
             }
 	}
 	
 	@Override
-    public void onPause() {
-        super.onPause();
-        if(mPublisher != null) {
-            mPreview.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mHandler.postDelayed(new Runnable() {
-            
-            @Override
-            public void run() {
-                if(mPublisher != null) {
-                    mPreview.setVisibility(View.VISIBLE);
-                    mPreview.removeView(mPublisher.getView());
-                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-                    mPreview.addView(mPublisher.getView(), lp);
-                }
-            }
-        }, 500);
-    }
-	
-    @Override
    	protected void onPublisherAdded(Session session, PublisherKit publisher) {
     	mHandler.postDelayed(new Runnable() {	  
             @Override

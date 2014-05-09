@@ -3,6 +3,7 @@ package com.tokbox.android.opentokrtc;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 
 import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.OpentokError;
@@ -11,7 +12,9 @@ import com.opentok.android.Subscriber;
 import com.opentok.android.SubscriberKit;
 
 public class Participant extends Subscriber {
-
+	
+	private static final String LOGTAG = "Participant";
+	
 	private String mUserId;
     private String mName;
     private Context mContext;
@@ -50,6 +53,8 @@ public class Participant extends Subscriber {
     @Override
 	protected void onVideoDisabled(SubscriberKit subscriber) {
 		super.onVideoDisabled(subscriber);
+		
+		Log.i(LOGTAG, "Video quality changed. It is disabled for the subscriber");
 		mSubscriberVideoOnly = true;
 		mActivity.setAudioOnlyView(true);
 	}

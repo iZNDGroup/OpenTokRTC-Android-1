@@ -5,6 +5,4 @@
 
     <dimen name="publisher_height_default">100dp</dimen>
     <dimen name="publisher_width_default">75dp</dimen>
-
-
-    </resources>
+</resources>
