@@ -12,7 +12,7 @@ import com.opentok.android.Subscriber;
 import com.opentok.android.SubscriberKit;
 
 public class Participant extends Subscriber {
-	
+
 	private static final String LOGTAG = "Participant";
 	
 	private String mUserId;
@@ -53,10 +53,16 @@ public class Participant extends Subscriber {
     @Override
 	protected void onVideoDisabled(SubscriberKit subscriber) {
 		super.onVideoDisabled(subscriber);
-		
 		Log.i(LOGTAG, "Video quality changed. It is disabled for the subscriber");
 		mSubscriberVideoOnly = true;
 		mActivity.setAudioOnlyView(true);
+	}
+    
+	@Override
+	protected void onVideoDataReceived(SubscriberKit subscriber) {
+		super.onVideoDataReceived(subscriber);
+		Log.i(LOGTAG, "First frame received");
+		mActivity.updateLoadingSub();
 	}
 
 	@Override
@@ -82,4 +88,5 @@ public class Participant extends Subscriber {
 		
 		alertDialog.show();
 	}
+	
 }

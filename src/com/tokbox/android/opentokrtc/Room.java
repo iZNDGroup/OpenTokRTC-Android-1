@@ -169,6 +169,14 @@ public class Room extends Session {
         }	    
 	}
 
+	public void loadSubscriberView() {
+		// stop loading spinning
+        if (mActivity.getmLoadingSub().getVisibility() == View.VISIBLE) {
+        	mActivity.getmLoadingSub().setVisibility(View.GONE);
+        }
+        mPagerAdapter.notifyDataSetChanged();
+	}
+	
 	public Publisher getmPublisher() {
 		return mPublisher;
 	}
@@ -269,17 +277,20 @@ public class Room extends Session {
 		if (mParticipants.size() != 0) {
 			p.setSubscribeToVideo(false);
 		}
+		else {
+			// start loading spinning
+	        mActivity.getmLoadingSub().setVisibility(View.VISIBLE);
+		}
 
 		p.getView().setOnClickListener(this.onSubscriberUIClick);
 		
 		//Subscribe to this participant
 		this.subscribe(p);
-
+		
 		mParticipants.add(p);
 		mParticipantStream.put(stream, p);
 		mParticipantConnection.put(stream.getConnection().getConnectionId(), p);
-		mPagerAdapter.notifyDataSetChanged();
-
+		
 		presentText("\n" + p.getmName() + " has joined the chat");	
 		mActivity.showArrowsOnSubscriber();
 	}
@@ -292,9 +303,11 @@ public class Room extends Session {
 			mParticipantStream.remove(stream);
 			mParticipantConnection.remove(stream.getConnection().getConnectionId());
 			mPagerAdapter.notifyDataSetChanged();
+			mCurrentParticipant = null;
 			
 			presentText("\n" + p.getmName() + " has left the chat");
 			mActivity.showArrowsOnSubscriber();
+			mActivity.mSubscriberFragment.showSubscriberWidget(false);
 		}
 		
 	}

@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
@@ -72,7 +73,7 @@ public class ChatRoomActivity extends Activity implements
 	private ViewPager mPlayersView;	
 	private ImageView mLeftArrowImage;
 	private ImageView mRightArrowImage;	
-	
+	protected ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
 	private RelativeLayout mSubscriberAudioOnlyView;
 	private RelativeLayout mMessageBox;
 	
@@ -114,7 +115,8 @@ public class ChatRoomActivity extends Activity implements
 		mLeftArrowImage = (ImageView) findViewById(R.id.left_arrow);
 		mRightArrowImage = (ImageView) findViewById(R.id.right_arrow);
 		mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
-
+		mLoadingSub = (ProgressBar) findViewById(R.id.loadingSpinner);
+		
 		Uri url = getIntent().getData();
         if(url == null) {
             mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
@@ -227,7 +229,6 @@ public class ChatRoomActivity extends Activity implements
 		if (mRoom != null) {
 			mRoom.disconnect();
 		}
-		
 	}
 	
 	public void reloadInterface() {
@@ -416,6 +417,14 @@ public class ChatRoomActivity extends Activity implements
 		return mPublisherFragment;
 	}
 
+	public ProgressBar getmLoadingSub() {
+		return mLoadingSub;
+	}
+	
+	public void updateLoadingSub() {
+		mRoom.loadSubscriberView();
+	}
+
 	//Callbacks
 	@Override
 	public void onMuteSubscriber() {
@@ -505,7 +514,7 @@ public class ChatRoomActivity extends Activity implements
 	private OnClickListener onPublisherUIClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			if	(mRoom.getmCurrentParticipant()!= null) {
+			if (mRoom.getmCurrentParticipant() != null) {
 				mSubscriberFragment.subscriberClick();
 				showArrowsOnSubscriber();
             }
