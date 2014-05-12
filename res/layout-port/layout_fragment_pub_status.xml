@@ -4,7 +4,6 @@
     android:id="@+id/layoutPubFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@null"
     tools:context=".UIActivity" >
     
      <RelativeLayout
