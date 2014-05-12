@@ -61,7 +61,7 @@ public class Room extends Session {
 	private Handler mHandler;
 	
 	protected PagerAdapter mPagerAdapter = new PagerAdapter() {
-
+	
 		@Override
 		public boolean isViewFromObject(View arg0, Object arg1) {
 			return ((Participant) arg1).getView() == arg0;
@@ -124,7 +124,7 @@ public class Room extends Session {
 			return POSITION_NONE;
 		}
 	};
-
+	
 	public Room(Context context, String roomName, String sessionId, String token, String apiKey, String username) {
 		super(context, apiKey, sessionId);
 		this.apikey = apiKey;
@@ -139,7 +139,7 @@ public class Room extends Session {
 
 	public void setParticipantsViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
         this.mParticipantsViewContainer = container;
-        this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
+        //this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
         this.onSubscriberUIClick = onSubscriberUIClick;
         mPagerAdapter.notifyDataSetChanged();
     }
@@ -174,6 +174,7 @@ public class Room extends Session {
         if (mActivity.getmLoadingSub().getVisibility() == View.VISIBLE) {
         	mActivity.getmLoadingSub().setVisibility(View.GONE);
         }
+        this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
 	}
 	

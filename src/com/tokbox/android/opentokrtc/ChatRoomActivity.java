@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -70,7 +71,7 @@ public class ChatRoomActivity extends Activity implements
 	private AlertDialog mErrorDialog;
 	private EditText mMessageEditText;
 	private ViewGroup mPreview;
-	private ViewPager mPlayersView;	
+	private ViewPager mParticipantsView;	
 	private ImageView mLeftArrowImage;
 	private ImageView mRightArrowImage;	
 	protected ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
@@ -111,7 +112,7 @@ public class ChatRoomActivity extends Activity implements
 		mMessageEditText = (EditText) findViewById(R.id.message);
 
 		mPreview = (ViewGroup) findViewById(R.id.publisherview);
-		mPlayersView = (ViewPager) findViewById(R.id.pager);
+		mParticipantsView = (ViewPager) findViewById(R.id.pager);
 		mLeftArrowImage = (ImageView) findViewById(R.id.left_arrow);
 		mRightArrowImage = (ImageView) findViewById(R.id.right_arrow);
 		mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
@@ -301,7 +302,7 @@ public class ChatRoomActivity extends Activity implements
 				mRoom = room;
 				mPreview.setOnClickListener(onPublisherUIClick);
 				mRoom.setPreviewView(mPreview);
-				mRoom.setParticipantsViewContainer(mPlayersView, onSubscriberUIClick);
+				mRoom.setParticipantsViewContainer(mParticipantsView, onSubscriberUIClick);
 				mRoom.setMessageView((TextView) findViewById(R.id.messageView),
 						(ScrollView) findViewById(R.id.scroller));
 				mRoom.connect();
@@ -498,9 +499,10 @@ public class ChatRoomActivity extends Activity implements
 	private OnClickListener onSubscriberUIClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			mSubscriberFragment.subscriberClick();
-			showArrowsOnSubscriber();
-			
+			if(mRoom.getmCurrentParticipant() != null) {
+				mSubscriberFragment.subscriberClick();
+				showArrowsOnSubscriber();
+			}
 			if (mRoom.getmPublisher() != null) {
 				mPublisherFragment.publisherClick();
 				if (mArchiving) {
@@ -560,12 +562,12 @@ public class ChatRoomActivity extends Activity implements
 	
 	public void nextParticipant(View view) {
 		int nextPosition = mRoom.getmCurrentPosition() +1;
-		mPlayersView.setCurrentItem(nextPosition);
+		mParticipantsView.setCurrentItem(nextPosition);
 	}
 	
 	public void lastParticipant(View view) {
 		int nextPosition = mRoom.getmCurrentPosition() -1;
-		mPlayersView.setCurrentItem(nextPosition);
+		mParticipantsView.setCurrentItem(nextPosition);
 	}
 	
 	//Show audio only icon when video quality changed and it is disabled for the subscriber
