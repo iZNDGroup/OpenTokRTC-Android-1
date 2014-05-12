@@ -53,5 +53,14 @@
         android:text="@string/room_selection_intro"
         android:layout_above="@id/inputArea"
         style="@style/AppTheme.TitleText" />
+    
+    <TextView android:id="@+id/author_label"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/author"
+        android:layout_alignParentBottom= "true"
+        android:textColor="@color/white"
+        android:textSize="14sp"/>
 
 </RelativeLayout>
