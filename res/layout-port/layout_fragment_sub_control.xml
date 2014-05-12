@@ -4,6 +4,7 @@
     android:id="@+id/layoutSubFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/trans_dark_grey"
     android:layout_gravity="center_vertical|center_horizontal" >
     
      <RelativeLayout
@@ -11,8 +12,7 @@
         android:layout_width="fill_parent"
         android:layout_height="48dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:background="@color/trans_dark_grey" >
+        android:layout_centerHorizontal="true" >
         <View
             android:id="@+id/line1"
             android:layout_width="match_parent"
