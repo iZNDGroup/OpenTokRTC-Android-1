@@ -169,12 +169,14 @@ public class Room extends Session {
 	}
 
 	public void loadSubscriberView() {
-		// stop loading spinning
+		//stop loading spinning
         if (mActivity.getmLoadingSub().getVisibility() == View.VISIBLE) {
         	mActivity.getmLoadingSub().setVisibility(View.GONE);
         }
         this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
+        
+        //show control bars
     	mActivity.mSubscriberFragment.showSubscriberWidget(true);
     	mActivity.mSubscriberFragment.initSubscriberUI();
 		if (mPublisher != null) {
