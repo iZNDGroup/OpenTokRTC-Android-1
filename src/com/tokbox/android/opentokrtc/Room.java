@@ -139,7 +139,6 @@ public class Room extends Session {
 
 	public void setParticipantsViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
         this.mParticipantsViewContainer = container;
-        //this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
         this.onSubscriberUIClick = onSubscriberUIClick;
         mPagerAdapter.notifyDataSetChanged();
     }
