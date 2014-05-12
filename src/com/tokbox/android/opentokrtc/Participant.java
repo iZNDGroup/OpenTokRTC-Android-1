@@ -51,23 +51,23 @@ public class Participant extends Subscriber {
 	}
 
     @Override
-	protected void onVideoDisabled(SubscriberKit subscriber) {
-		super.onVideoDisabled(subscriber);
+	protected void onVideoDisabled() {
+		super.onVideoDisabled();
 		Log.i(LOGTAG, "Video quality changed. It is disabled for the subscriber");
 		mSubscriberVideoOnly = true;
 		mActivity.setAudioOnlyView(true);
 	}
     
 	@Override
-	protected void onVideoDataReceived(SubscriberKit subscriber) {
-		super.onVideoDataReceived(subscriber);
+	protected void onVideoDataReceived() {
+		super.onVideoDataReceived();
 		Log.i(LOGTAG, "First frame received");
 		mActivity.updateLoadingSub();
 	}
 
 	@Override
-	protected void onError(SubscriberKit subscriber, OpentokError error) {
-		super.onError(subscriber, error);
+	protected void onError(OpentokError error) {
+		super.onError(error);
 		showErrorDialog(error);
 	}
 

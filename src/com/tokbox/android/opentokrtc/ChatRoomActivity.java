@@ -594,10 +594,10 @@ public class ChatRoomActivity extends Activity implements
 	
 	//Update publisher status bar when archiving stars/stops
 	public void updateArchivingStatus(boolean archiving) {
-		mPublisherFragment.showPublisherWidget(false);
 		mArchiving = archiving;
 		
 		if (archiving) {
+			mPublisherFragment.showPublisherWidget(false);
 			mPublisherStatusFragment.updateArchivingUI(true);
 			mPublisherFragment.showPublisherWidget(true);
 			mPublisherFragment.initPublisherUI();

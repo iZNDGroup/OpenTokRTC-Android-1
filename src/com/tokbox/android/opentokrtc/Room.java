@@ -244,7 +244,7 @@ public class Room extends Session {
     }
 	
 	@Override
-	protected void onConnected(Session session) {
+	protected void onConnected() {
 		Publisher p = new Publisher(mContext, "Android");
 		mPublisher = p;
 		mPublisher.setName(mPublisherName);
@@ -267,7 +267,7 @@ public class Room extends Session {
 	}
 
 	@Override
-	protected void onStreamReceived(Session session, Stream stream) {
+	protected void onStreamReceived(Stream stream) {
 		Participant p = new Participant(mContext, stream);
 	
 		//We can use connection data to obtain each user id
@@ -296,7 +296,7 @@ public class Room extends Session {
 	}
 
 	@Override
-	protected void onStreamDropped(Session session, Stream stream) {
+	protected void onStreamDropped(Stream stream) {
 		Participant p = mParticipantStream.get(stream);
 		if (p != null) {
 			mParticipants.remove(p);
@@ -313,7 +313,7 @@ public class Room extends Session {
 	}
 
 	@Override
-	protected void onSignalReceived(Session session, String type, String data,
+	protected void onSignalReceived(String type, String data,
 			Connection connection) {
 	    Log.d(LOGTAG, "Received signal:" + type + " data:" + data + "connection: " + connection);
         
@@ -373,7 +373,7 @@ public class Room extends Session {
 	}
 	
 	@Override
-   	protected void onPublisherAdded(Session session, PublisherKit publisher) {
+   	protected void onPublisherAdded(PublisherKit publisher) {
     	mHandler.postDelayed(new Runnable() {	  
             @Override
             public void run() {
@@ -383,11 +383,10 @@ public class Room extends Session {
         }, 0);	
     }
     
+
 	@Override
-	public void archiveCreated(Session session, String archiveName,
-			String archiveId, String archiveStatus) {	
-		super.archiveCreated(session, archiveName, archiveId, archiveStatus);
-		
+	protected void onArchiveStarted() {
+		super.onArchiveStarted();
 		mHandler.postDelayed(new Runnable() {  
             @Override
             public void run() {
@@ -397,10 +396,8 @@ public class Room extends Session {
 	}
 
 	@Override
-	public void archiveStatusChanged(Session session, String archiveId,
-			String archiveStatus) {
-		super.archiveStatusChanged(session, archiveId, archiveStatus);
-		
+	protected void onArchiveStopped() {
+		super.onArchiveStopped();		
 		mHandler.postDelayed(new Runnable() {  
             @Override
             public void run() {
@@ -410,8 +407,8 @@ public class Room extends Session {
 	}
 
 	@Override
-	protected void onError(Session session, OpentokError error) {
-		super.onError(session, error);
+	protected void onError(OpentokError error) {
+		super.onError(error);
 		 Toast.makeText(this.mContext, error.getMessage(), Toast.LENGTH_SHORT).show();
 	}
 	

@@ -90,8 +90,10 @@ public class PublisherStatusFragment extends Fragment {
 	private Runnable mPubStatusWidgetTimerTask = new Runnable() {
 		@Override
 		public void run() {
-			showPubStatusWidget(false);
-			chatRoomActivity.setPublisherMargins();
+			if (mArchiving) {
+				showPubStatusWidget(false);
+				chatRoomActivity.setPublisherMargins();
+			}
 		}
 	};
 
