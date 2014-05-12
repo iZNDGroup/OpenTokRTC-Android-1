@@ -499,8 +499,8 @@ public class ChatRoomActivity extends Activity implements
 		@Override
 		public void onClick(View v) {
 			if(mRoom.getmCurrentParticipant() != null) {
-				mSubscriberFragment.subscriberClick();
-				showArrowsOnSubscriber();
+					mSubscriberFragment.subscriberClick();
+					showArrowsOnSubscriber();	
 			}
 			if (mRoom.getmPublisher() != null) {
 				mPublisherFragment.publisherClick();
@@ -552,6 +552,11 @@ public class ChatRoomActivity extends Activity implements
 		if (show) {
         	mLeftArrowImage.setVisibility(View.VISIBLE);
         	mRightArrowImage.setVisibility(View.VISIBLE);
+        	//to show all the controls
+        	if (mRoom.getmPublisher() != null) {
+        		mPublisherStatusFragment.showPubStatusWidget(true);
+        	}
+        	mSubscriberFragment.showSubscriberWidget(true);
         }
         else {
         	mLeftArrowImage.setVisibility(View.GONE);

@@ -17,8 +17,8 @@ import android.widget.TextView;
 
 public class SubscriberControlFragment extends Fragment implements
         View.OnClickListener {
-
-    private static final String LOGTAG = "demo-UI-sub-control-fragment";
+	
+	private static final String LOGTAG = "demo-UI-sub-control-fragment";
     // Animation constants
     private static final int ANIMATION_DURATION = 500;
     private static final int SUBSCRIBER_CONTROLS_DURATION = 7000;
@@ -116,7 +116,7 @@ public class SubscriberControlFragment extends Fragment implements
                  mSubscriberWidgetTimerTask);
      	chatRoomActivity.getmHandler().postDelayed(mSubscriberWidgetTimerTask,
                  SUBSCRIBER_CONTROLS_DURATION);
-         mSubscriberName.setText(chatRoomActivity.getmRoom().getmCurrentParticipant().getStream()
+        mSubscriberName.setText(chatRoomActivity.getmRoom().getmCurrentParticipant().getStream()
                  .getName());
     }
     
@@ -138,7 +138,7 @@ public class SubscriberControlFragment extends Fragment implements
     }
 
     //Set animation to show and hide the subscriber control bar  
-    private void showSubscriberWidget(boolean show, boolean animate) {
+    private void showSubscriberWidget(boolean show, boolean animate) {   	
     	mSubContainer.clearAnimation();
 		mSubscriberWidgetVisible = show;
 		float dest = show ? 1.0f : 0.0f;
@@ -175,5 +175,5 @@ public class SubscriberControlFragment extends Fragment implements
         mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
                 .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
     }
-
+  
 }

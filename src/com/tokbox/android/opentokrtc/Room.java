@@ -175,6 +175,13 @@ public class Room extends Session {
         }
         this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
+    	mActivity.mSubscriberFragment.showSubscriberWidget(true);
+    	mActivity.mSubscriberFragment.initSubscriberUI();
+		if (mPublisher != null) {
+			mActivity.mPublisherFragment.showPublisherWidget(true);
+			mActivity.setPublisherMargins();
+		}
+		mActivity.showArrowsOnSubscriber();
 	}
 	
 	public Publisher getmPublisher() {
@@ -292,7 +299,7 @@ public class Room extends Session {
 		mParticipantConnection.put(stream.getConnection().getConnectionId(), p);
 		
 		presentText("\n" + p.getmName() + " has joined the chat");	
-		mActivity.showArrowsOnSubscriber();
+	
 	}
 
 	@Override
