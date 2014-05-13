@@ -9,7 +9,6 @@ import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.OpentokError;
 import com.opentok.android.Stream;
 import com.opentok.android.Subscriber;
-import com.opentok.android.SubscriberKit;
 
 public class Participant extends Subscriber {
 
