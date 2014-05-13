@@ -10,6 +10,8 @@
     <string name="error">The session failed to connect</string>
     <string name="error_title">OpenTokRTC Error</string>
     <string name="author">Powered by OpenTok</string>
+    <string name="welcome_text_chat">Welcome to OpenTokRTC by TokBox. \n</string>
+    <string name="nick">/nick </string>
     
     <string name="swapStr">Swap camera</string>
     <string name="endCall1">End call</string>

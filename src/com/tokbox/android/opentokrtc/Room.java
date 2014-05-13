@@ -269,9 +269,9 @@ public class Room extends Session {
 		p.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
 				BaseVideoRenderer.STYLE_VIDEO_FILL);
 
-		presentText("Welcome to OpenTokRTC by TokBox. \n");
+		presentText((mActivity.getResources().getString(R.string.welcome_text_chat)));
 		if (mPublisherName != null && !mPublisherName.isEmpty()) {
-			sendChatMessage("/nick " + mPublisherName);
+			sendChatMessage(mActivity.getResources().getString((R.string.nick)) + " " + mPublisherName);
 		}
 	}
 
