@@ -134,7 +134,6 @@ public class Room extends Session {
 		this.mPublisherName = username;
 		this.mHandler = new Handler(context.getMainLooper());
 		this.mActivity = (ChatRoomActivity) this.mContext;
-		
 	}
 
 	public void setParticipantsViewContainer(ViewPager container, OnClickListener onSubscriberUIClick) {
@@ -173,6 +172,7 @@ public class Room extends Session {
         if (mActivity.getmLoadingSub().getVisibility() == View.VISIBLE) {
         	mActivity.getmLoadingSub().setVisibility(View.GONE);
         }
+        
         this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
         
