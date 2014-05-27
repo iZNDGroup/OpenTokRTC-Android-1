@@ -567,11 +567,19 @@ public class ChatRoomActivity extends Activity implements
 	public void nextParticipant(View view) {
 		int nextPosition = mRoom.getmCurrentPosition() +1;
 		mParticipantsView.setCurrentItem(nextPosition);
+		
+		//reload subscriber controls UI
+		mSubscriberFragment.initSubscriberWidget();
+		mSubscriberFragment.showSubscriberWidget(true);
 	}
 	
 	public void lastParticipant(View view) {
 		int nextPosition = mRoom.getmCurrentPosition() -1;
 		mParticipantsView.setCurrentItem(nextPosition);
+		
+		//reload subscriber controls UI
+		mSubscriberFragment.initSubscriberWidget();
+		mSubscriberFragment.showSubscriberWidget(true);
 	}
 	
 	//Show audio only icon when video quality changed and it is disabled for the subscriber
