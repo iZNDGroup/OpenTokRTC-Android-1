@@ -82,13 +82,13 @@ public class SubscriberControlFragment extends Fragment implements
         mSubContainer = (RelativeLayout) chatRoomActivity
 				.findViewById(R.id.fragment_sub_container);
 
-		showSubscriberWidget(mSubscriberWidgetVisible, false);
-
         mSubscriberMute = (ImageButton) rootView
                 .findViewById(R.id.muteSubscriber);
         mSubscriberMute.setOnClickListener(this);
 
         mSubscriberName = (TextView) rootView.findViewById(R.id.subscriberName);
+
+		showSubscriberWidget(mSubscriberWidgetVisible, false);
 
         return rootView;
     }
@@ -148,8 +148,10 @@ public class SubscriberControlFragment extends Fragment implements
 		mSubContainer.startAnimation(aa);
 
 		if (show) {
+			mSubscriberMute.setClickable(true);
 			mSubContainer.setVisibility(View.VISIBLE);
 		} else {
+			mSubscriberMute.setClickable(false);
 			mSubContainer.setVisibility(View.GONE);
 		}
     }
