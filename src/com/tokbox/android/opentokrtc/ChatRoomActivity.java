@@ -316,7 +316,7 @@ public class ChatRoomActivity extends Activity implements
 			URI roomURI;
 			URL url;
 			
-			String urlStr = "https://opentokrtc.com/" + room + ".json";
+			String urlStr = "https://rolandrtc.herokuapp.com/" + room + ".json";
 			try {
 				url = new URL(urlStr);
 				roomURI = new URI(url.getProtocol(), url.getUserInfo(),
