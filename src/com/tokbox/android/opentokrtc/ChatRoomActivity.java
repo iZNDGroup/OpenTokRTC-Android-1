@@ -57,7 +57,7 @@ public class ChatRoomActivity extends Activity implements
 	private static final int ANIMATION_DURATION = 500;   
 	public static final String ARG_ROOM_ID = "roomId";
 	public static final String ARG_USERNAME_ID = "usernameId";
-	private static final String URL = "http://opentokrtc.com/";
+	private static final String URL = "https://rolandrtc.herokuapp.com/";
 	
 	private String mRoomName;
 	protected Room mRoom;
@@ -118,7 +118,7 @@ public class ChatRoomActivity extends Activity implements
 		mLoadingSub = (ProgressBar) findViewById(R.id.loadingSpinner);
 		
 		Uri url = getIntent().getData();
-        if(url == null) {
+		if(url == null) {
             mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
             mUsername = getIntent().getStringExtra(ARG_USERNAME_ID);
         } else {
@@ -316,7 +316,7 @@ public class ChatRoomActivity extends Activity implements
 			URI roomURI;
 			URL url;
 			
-			String urlStr = "https://rolandrtc.herokuapp.com/" + room + ".json";
+			String urlStr = URL + room + ".json";
 			try {
 				url = new URL(urlStr);
 				roomURI = new URI(url.getProtocol(), url.getUserInfo(),
