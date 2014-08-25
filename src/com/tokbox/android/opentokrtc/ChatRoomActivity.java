@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -242,6 +243,7 @@ public class ChatRoomActivity extends Activity implements
 		if (mRoom != null) {
 			mRoom.disconnect();
 		}
+		restartAudioMode();
 	}
 
 	public void reloadInterface() {
@@ -470,6 +472,7 @@ public class ChatRoomActivity extends Activity implements
 		if (mRoom != null) {
 			mRoom.disconnect();
 		}
+		restartAudioMode();
 		finish();
 	}
 
@@ -483,6 +486,12 @@ public class ChatRoomActivity extends Activity implements
 		showArrowsOnSubscriber();
 	}
 
+	public void restartAudioMode() {
+		AudioManager Audio =  (AudioManager) getSystemService(Context.AUDIO_SERVICE); 
+	    Audio.setMode(AudioManager.MODE_NORMAL);
+	    this.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+	}
+	
 	// Adjust publisher view if its control bar is hidden
 	public void setPublisherMargins() {
 		int bottomMargin = 0;
