@@ -116,12 +116,12 @@ public class SubscriberControlFragment extends Fragment implements
                  mSubscriberWidgetTimerTask);
      	chatRoomActivity.getmHandler().postDelayed(mSubscriberWidgetTimerTask,
                  SUBSCRIBER_CONTROLS_DURATION);
-        mSubscriberName.setText(chatRoomActivity.getRoom().getmCurrentParticipant().getStream()
+        mSubscriberName.setText(chatRoomActivity.getmRoom().getmCurrentParticipant().getStream()
                  .getName());
     }
     
     public void initSubscriberWidget() {
-    	mSubscriberMute.setImageResource(chatRoomActivity.getRoom().getmCurrentParticipant()
+    	mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
                  .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
     }
     
@@ -174,7 +174,7 @@ public class SubscriberControlFragment extends Fragment implements
     public void muteSubscriber() {
         mCallbacks.onMuteSubscriber();
 
-        mSubscriberMute.setImageResource(chatRoomActivity.getRoom().getmCurrentParticipant()
+        mSubscriberMute.setImageResource(chatRoomActivity.getmRoom().getmCurrentParticipant()
                 .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
     }
   

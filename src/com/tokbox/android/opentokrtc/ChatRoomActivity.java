@@ -31,12 +31,12 @@ import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -55,7 +55,7 @@ public class ChatRoomActivity extends Activity implements
 
 	private static final int NOTIFICATION_ID = 1;
 	private static final String LOGTAG = "ChatRoomActivity";
-	private static final int ANIMATION_DURATION = 500;
+	private static final int ANIMATION_DURATION = 500;   
 	public static final String ARG_ROOM_ID = "roomId";
 	public static final String ARG_USERNAME_ID = "usernameId";
 	private String serverURL = null;
@@ -63,27 +63,26 @@ public class ChatRoomActivity extends Activity implements
 	private String mRoomName;
 	protected Room mRoom;
 	private String mUsername = null;
-	private boolean mSubscriberAudioOnly = false;
+	private boolean mSubscriberVideoOnly = false;
 	private boolean mArchiving = false;
-
-	// Interface
+	
+	//Interface
 	private ProgressDialog mConnectingDialog;
 	private AlertDialog mErrorDialog;
 	private EditText mMessageEditText;
 	private ViewGroup mPreview;
-	private ViewPager mParticipantsView;
+	private ViewPager mParticipantsView;	
 	private ImageView mLeftArrowImage;
-	private ImageView mRightArrowImage;
-	protected ProgressBar mLoadingSub; // Spinning wheel for loading subscriber
-										// view
+	private ImageView mRightArrowImage;	
+	protected ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
 	private RelativeLayout mSubscriberAudioOnlyView;
 	private RelativeLayout mMessageBox;
-
-	// Fragments
+	
+	//Fragments
 	protected SubscriberControlFragment mSubscriberFragment;
 	protected PublisherControlFragment mPublisherFragment;
 	protected PublisherStatusFragment mPublisherStatusFragment;
-
+	
 	protected Handler mHandler = new Handler();
 
 	private NotificationCompat.Builder mNotifyBuilder;
@@ -91,24 +90,24 @@ public class ChatRoomActivity extends Activity implements
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+	
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		setContentView(R.layout.room_layout);
-
-		// Custom title bar
-		ActionBar actionBar = getActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setDisplayUseLogoEnabled(false);
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setDisplayShowCustomEnabled(true);
-
-		View cView = getLayoutInflater().inflate(R.layout.custom_title, null);
-		actionBar.setCustomView(cView);
-
+		
+		//Custom title bar
+      	ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayUseLogoEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowCustomEnabled(true);
+      
+        View cView = getLayoutInflater().inflate(R.layout.custom_title, null);
+        actionBar.setCustomView(cView);
+        
 		mMessageBox = (RelativeLayout) findViewById(R.id.messagebox);
 		mMessageEditText = (EditText) findViewById(R.id.message);
 
@@ -118,7 +117,7 @@ public class ChatRoomActivity extends Activity implements
 		mRightArrowImage = (ImageView) findViewById(R.id.right_arrow);
 		mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
 		mLoadingSub = (ProgressBar) findViewById(R.id.loadingSpinner);
-
+		
 		Uri url = getIntent().getData();
 		serverURL = getResources().getString(R.urls.serverURL);
 		
@@ -137,132 +136,131 @@ public class ChatRoomActivity extends Activity implements
 			initPublisherFragment();
 			initPublisherStatusFragment();
 		}
-
-		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		initializeRoom();
-
+	      
+        mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+      	initializeRoom();
+		
 	}
-
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 
 		// Remove publisher & subscriber views because we want to reuse them
 		if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
-			mRoom.getmParticipantsViewContainer().removeView(
-					mRoom.getmCurrentParticipant().getView());
+			mRoom.getmParticipantsViewContainer().removeView(mRoom.getmCurrentParticipant().getView());
 		}
 		reloadInterface();
 	}
-
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			onBackPressed();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
+	    switch (item.getItemId()) {
+	        case android.R.id.home:
+	            onBackPressed();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
-
+	
 	@Override
 	public void onPause() {
 		super.onPause();
-
-		// Pause implies go to audio only mode
+		
+		//Pause implies go to audio only mode
 		if (mRoom != null) {
 			mRoom.onPause();
-
+			
 			if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
-				mRoom.getmParticipantsViewContainer().removeView(
-						mRoom.getmCurrentParticipant().getView());
+				mRoom.getmParticipantsViewContainer().removeView(mRoom.getmCurrentParticipant().getView());
 			}
 		}
-
-		// Add notification to status bar
+		
+		//Add notification to status bar
 		mNotifyBuilder = new NotificationCompat.Builder(this)
-				.setContentTitle("OpenTokRTC").setContentText("Ongoing call")
-				.setSmallIcon(R.drawable.ic_launcher).setOngoing(true);
-
+        .setContentTitle("OpenTokRTC")
+        .setContentText("Ongoing call")
+        .setSmallIcon(R.drawable.ic_launcher).setOngoing(true);
+        
 		Intent notificationIntent = new Intent(this, ChatRoomActivity.class);
-		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		notificationIntent.putExtra(ChatRoomActivity.ARG_ROOM_ID, mRoomName);
-		PendingIntent intent = PendingIntent.getActivity(this, 0,
-				notificationIntent, 0);
-
-		mNotifyBuilder.setContentIntent(intent);
-		mNotificationManager.notify(NOTIFICATION_ID, mNotifyBuilder.build());
+	    notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	    notificationIntent.putExtra(ChatRoomActivity.ARG_ROOM_ID, mRoomName);
+	    PendingIntent intent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+	    
+	    mNotifyBuilder.setContentIntent(intent);
+		mNotificationManager.notify(
+                NOTIFICATION_ID,
+                mNotifyBuilder.build());
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 
-		// Resume implies restore video mode if it was enable before pausing app
+		//Resume implies restore video mode if it was enable before pausing app
 		if (mRoom != null) {
 			mRoom.onResume();
 		}
 
 		mNotificationManager.cancel(NOTIFICATION_ID);
 
-		if (mRoom != null) {
-			mRoom.onResume();
-		}
-
-		reloadInterface();
+        if (mRoom != null) {
+        	mRoom.onResume();
+        }
+        
+        reloadInterface();
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 
-		if (this.isFinishing()) {
-			mNotificationManager.cancel(NOTIFICATION_ID);
-			if (mRoom != null) {
-				mRoom.disconnect();
-			}
-		}
+		if(this.isFinishing()) {
+	        mNotificationManager.cancel(NOTIFICATION_ID); 
+            if (mRoom != null) {
+            	mRoom.disconnect();
+            }
+        }
 	}
-
-	 @Override
-	    public void onDestroy() {
-		mNotificationManager.cancel(NOTIFICATION_ID);
-		if (mRoom != null) {
-			mRoom.disconnect();
-		}
-		super.onDestroy();
-		finish();
-	 }
-	 
+	
+	@Override
+    public void onDestroy() {
+    	mNotificationManager.cancel(NOTIFICATION_ID);
+    	if (mRoom != null)  {
+    		mRoom.disconnect();
+    	}
+    	super.onDestroy();
+    	finish();
+    }
+	
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-
+		
 		if (mRoom != null) {
 			mRoom.disconnect();
 		}
 		restartAudioMode();
 	}
-
+	
 	public void reloadInterface() {
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
-					mRoom.getmParticipantsViewContainer().addView(
-							mRoom.getmCurrentParticipant().getView());
+					mRoom.getmParticipantsViewContainer().addView(mRoom.getmCurrentParticipant().getView());
 				}
 			}
 		}, 500);
 	}
-
+	
 	private void initializeRoom() {
 		Log.i(LOGTAG, "initializing chat room fragment for room: " + mRoomName);
 		setTitle(mRoomName);
 
-		// Show connecting dialog
+		//Show connecting dialog
 		mConnectingDialog = new ProgressDialog(this);
 		mConnectingDialog.setTitle("Joining Room...");
 		mConnectingDialog.setMessage("Please wait.");
@@ -307,7 +305,7 @@ public class ChatRoomActivity extends Activity implements
 				return null;
 			}
 			return new Room(ChatRoomActivity.this, params[0], sessionId, token,
-					apiKey, params[1]);
+					apiKey, params [1]);
 		}
 
 		@Override
@@ -317,8 +315,7 @@ public class ChatRoomActivity extends Activity implements
 				mRoom = room;
 				mPreview.setOnClickListener(onPublisherUIClick);
 				mRoom.setPreviewView(mPreview);
-				mRoom.setParticipantsViewContainer(mParticipantsView,
-						onSubscriberUIClick);
+				mRoom.setParticipantsViewContainer(mParticipantsView, onSubscriberUIClick);
 				mRoom.setMessageView((TextView) findViewById(R.id.messageView),
 						(ScrollView) findViewById(R.id.scroller));
 				mRoom.connect();
@@ -332,7 +329,7 @@ public class ChatRoomActivity extends Activity implements
 		protected void initializeGetRequest(String room) {
 			URI roomURI;
 			URL url;
-
+			
 			String urlStr = "https://opentokrtc.com/" + room + ".json";
 			try {
 				url = new URL(urlStr);
@@ -357,7 +354,7 @@ public class ChatRoomActivity extends Activity implements
 			finish();
 		}
 	};
-
+	
 	private void showErrorDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.error_title);
@@ -367,10 +364,14 @@ public class ChatRoomActivity extends Activity implements
 		mErrorDialog = builder.create();
 		mErrorDialog.show();
 	}
-
-	public void onClickSend(View v) {
-		mRoom.sendChatMessage(mMessageEditText.getText().toString());
-		mMessageEditText.setText("");
+	
+	public void onClickSend(View v) {if(mMessageEditText.getText().toString().compareTo("") == 0){
+			Log.d("Send Message", "Cannot Send - Empty String");
+		}
+		else{
+			mRoom.sendChatMessage(mMessageEditText.getText().toString());
+			mMessageEditText.setText("");
+		}
 	}
 
 	public void onClickTextChat(View v) {
@@ -390,47 +391,46 @@ public class ChatRoomActivity extends Activity implements
 		sendIntent.setType("text/plain");
 		startActivity(sendIntent);
 	}
-
+	
 	public void onPublisherViewClick(View v) {
 		if (mRoom != null && mRoom.getmCurrentParticipant() != null) {
 			mRoom.getmCurrentParticipant().getView()
 					.setOnClickListener(onPublisherUIClick);
 		}
 	}
-
-	// Initialize fragments
+	
+	//Initialize fragments
 	public void initPublisherFragment() {
 		mPublisherFragment = new PublisherControlFragment();
 		getFragmentManager().beginTransaction()
-				.add(R.id.fragment_pub_container, mPublisherFragment).commit();
+				.add(R.id.fragment_pub_container, mPublisherFragment)
+				.commit();	
 	}
-
+	
 	public void initPublisherStatusFragment() {
 		mPublisherStatusFragment = new PublisherStatusFragment();
-		getFragmentManager()
-				.beginTransaction()
-				.add(R.id.fragment_pub_status_container,
-						mPublisherStatusFragment).commit();
+		getFragmentManager().beginTransaction()
+				.add(R.id.fragment_pub_status_container, mPublisherStatusFragment)
+				.commit();	
 	}
-
 	public void initSubscriberFragment() {
 		mSubscriberFragment = new SubscriberControlFragment();
 		getFragmentManager().beginTransaction()
 				.add(R.id.fragment_sub_container, mSubscriberFragment).commit();
 	}
 
-	public Room getRoom() {
+	public Room getmRoom() {
 		return mRoom;
 	}
 
 	public Handler getmHandler() {
 		return this.mHandler;
 	}
-
+	
 	public void setmHandler(Handler mHandler) {
 		this.mHandler = mHandler;
 	}
-
+	
 	public PublisherControlFragment getmPublisherFragment() {
 		return mPublisherFragment;
 	}
@@ -438,12 +438,12 @@ public class ChatRoomActivity extends Activity implements
 	public ProgressBar getmLoadingSub() {
 		return mLoadingSub;
 	}
-
+	
 	public void updateLoadingSub() {
 		mRoom.loadSubscriberView();
 	}
 
-	// Callbacks
+	//Callbacks
 	@Override
 	public void onMuteSubscriber() {
 		if (mRoom.getmCurrentParticipant() != null) {
@@ -475,15 +475,15 @@ public class ChatRoomActivity extends Activity implements
 		restartAudioMode();
 		finish();
 	}
-
+	
 	@Override
 	public void onStatusPubBar() {
 		setPublisherMargins();
 	}
-
+	
 	@Override
 	public void onStatusSubBar() {
-		showArrowsOnSubscriber();
+		showArrowsOnSubscriber();	
 	}
 
 	public void restartAudioMode() {
@@ -505,10 +505,11 @@ public class ChatRoomActivity extends Activity implements
 		if (mPublisherFragment.ismPublisherWidgetVisible() && mArchiving) {
 			bottomMargin = pubControlLayoutParams.height
 					+ pubStatusLayoutParams.height + dpToPx(20);
-		} else {
+		}
+		else {
 			if (mPublisherFragment.ismPublisherWidgetVisible()) {
 				bottomMargin = pubControlLayoutParams.height + dpToPx(20);
-			} else {
+			} else {	
 				params.addRule(RelativeLayout.ALIGN_BOTTOM);
 				bottomMargin = dpToPx(20);
 			}
@@ -517,20 +518,19 @@ public class ChatRoomActivity extends Activity implements
 		params.leftMargin = dpToPx(20);
 		mPreview.setLayoutParams(params);
 	}
-
-	// OnClickListeners to show/hide the control bars for publisher and
-	// subscribers
+	
+	//OnClickListeners to show/hide the control bars for publisher and subscribers
 	private OnClickListener onSubscriberUIClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			if (mRoom.getmCurrentParticipant() != null) {
-				mSubscriberFragment.subscriberClick();
-				showArrowsOnSubscriber();
+			if(mRoom.getmCurrentParticipant() != null) {
+					mSubscriberFragment.subscriberClick();
+					showArrowsOnSubscriber();	
 			}
 			if (mRoom.getmPublisher() != null) {
 				mPublisherFragment.publisherClick();
 				if (mArchiving) {
-					mPublisherStatusFragment.publisherClick();
+					mPublisherStatusFragment.publisherClick();	
 				}
 				setPublisherMargins();
 			}
@@ -543,101 +543,98 @@ public class ChatRoomActivity extends Activity implements
 			if (mRoom.getmCurrentParticipant() != null) {
 				mSubscriberFragment.subscriberClick();
 				showArrowsOnSubscriber();
-			}
-			if (mRoom.getmPublisher() != null) {
-				mPublisherFragment.publisherClick();
-				if (mArchiving) {
-					mPublisherStatusFragment.publisherClick();
-				}
-				setPublisherMargins();
-			}
-		}
+            }
+            if (mRoom.getmPublisher() != null) {
+            	mPublisherFragment.publisherClick();
+            	if (mArchiving) {
+            		mPublisherStatusFragment.publisherClick();
+            	}
+            	setPublisherMargins();
+            }
+        }
 	};
 
-	// Show next and last arrow on subscriber view if the number of subscribers
-	// is higher than 1
-	public void showArrowsOnSubscriber() {
+	//Show next and last arrow on subscriber view if the number of subscribers is higher than 1
+	public void showArrowsOnSubscriber(){
 		boolean show = false;
-		if (mRoom.getmParticipants().size() > 1) {
-			if (mLeftArrowImage.getVisibility() == View.GONE) {
-				show = true;
-			} else {
-				show = false;
-			}
-			mLeftArrowImage.clearAnimation();
-			mRightArrowImage.clearAnimation();
-			float dest = show ? 1.0f : 0.0f;
-			AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
-			aa.setDuration(ANIMATION_DURATION);
-			aa.setFillAfter(true);
-			mLeftArrowImage.startAnimation(aa);
-			mRightArrowImage.startAnimation(aa);
+		if (mRoom.getmParticipants().size() > 1 ) {
+	        	if (mLeftArrowImage.getVisibility() == View.GONE) {
+	        		show = true;
+	        	}
+	        	else {
+	        		show = false;
+	        	}
+	        	mLeftArrowImage.clearAnimation();
+	    		mRightArrowImage.clearAnimation();
+	    		float dest = show ? 1.0f : 0.0f;
+	    		AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
+	    		aa.setDuration(ANIMATION_DURATION);
+	    		aa.setFillAfter(true);
+	    		mLeftArrowImage.startAnimation(aa);
+	    		mRightArrowImage.startAnimation(aa);	    		
 		}
-
+		
 		if (show) {
-			mLeftArrowImage.setVisibility(View.VISIBLE);
-			mRightArrowImage.setVisibility(View.VISIBLE);
-			// to show all the controls
-			if (mRoom.getmPublisher() != null) {
-				mPublisherStatusFragment.showPubStatusWidget(true);
-			}
-			mSubscriberFragment.showSubscriberWidget(true);
-		} else {
-			mLeftArrowImage.setVisibility(View.GONE);
-			mRightArrowImage.setVisibility(View.GONE);
-		}
+        	mLeftArrowImage.setVisibility(View.VISIBLE);
+        	mRightArrowImage.setVisibility(View.VISIBLE);
+        	//to show all the controls
+        	if (mRoom.getmPublisher() != null) {
+        		mPublisherStatusFragment.showPubStatusWidget(true);
+        	}
+        	mSubscriberFragment.showSubscriberWidget(true);
+        }
+        else {
+        	mLeftArrowImage.setVisibility(View.GONE);
+        	mRightArrowImage.setVisibility(View.GONE);
+        }
 	}
-
+	
 	public void nextParticipant(View view) {
-		int nextPosition = mRoom.getmCurrentPosition() + 1;
+		int nextPosition = mRoom.getmCurrentPosition() +1;
 		mParticipantsView.setCurrentItem(nextPosition);
-
-		// reload subscriber controls UI
+		
+		//reload subscriber controls UI
 		mSubscriberFragment.initSubscriberWidget();
 		mSubscriberFragment.showSubscriberWidget(true);
 	}
-
+	
 	public void lastParticipant(View view) {
-		int nextPosition = mRoom.getmCurrentPosition() - 1;
+		int nextPosition = mRoom.getmCurrentPosition() -1;
 		mParticipantsView.setCurrentItem(nextPosition);
-
-		// reload subscriber controls UI
+		
+		//reload subscriber controls UI
 		mSubscriberFragment.initSubscriberWidget();
 		mSubscriberFragment.showSubscriberWidget(true);
 	}
-
-	// Show audio only icon when video quality changed and it is disabled for
-	// the subscriber
+	
+	//Show audio only icon when video quality changed and it is disabled for the subscriber
 	public void setAudioOnlyView(boolean audioOnlyEnabled) {
-		if (audioOnlyEnabled != mSubscriberAudioOnly) {
-			mSubscriberAudioOnly = audioOnlyEnabled;
+		mSubscriberVideoOnly = audioOnlyEnabled;
 
-			if (audioOnlyEnabled) {
-				mRoom.getmCurrentParticipant().getView()
-						.setVisibility(View.GONE);
-				mSubscriberAudioOnlyView.setVisibility(View.VISIBLE);
-				mSubscriberAudioOnlyView
-						.setOnClickListener(onSubscriberUIClick);
+		if (audioOnlyEnabled) {
+			mRoom.getmCurrentParticipant().getView().setVisibility(View.GONE);
+			mSubscriberAudioOnlyView.setVisibility(View.VISIBLE);
+			mSubscriberAudioOnlyView.setOnClickListener(onSubscriberUIClick);
 
-				// Audio only text for subscriber
-				TextView subStatusText = (TextView) findViewById(R.id.subscriberName);
-				subStatusText.setText(R.string.audioOnly);
-				AlphaAnimation aa = new AlphaAnimation(1.0f, 0.0f);
-				aa.setDuration(ANIMATION_DURATION);
-				subStatusText.startAnimation(aa);
-
-			} else {
-				mRoom.getmCurrentParticipant().getView()
-						.setVisibility(View.VISIBLE);
+			// Audio only text for subscriber
+			TextView subStatusText = (TextView) findViewById(R.id.subscriberName);
+			subStatusText.setText(R.string.audioOnly);
+			AlphaAnimation aa = new AlphaAnimation(1.0f, 0.0f);
+			aa.setDuration(ANIMATION_DURATION);
+			subStatusText.startAnimation(aa);
+			
+		} else {
+			if (!mSubscriberVideoOnly) {
+				mRoom.getmCurrentParticipant().getView().setVisibility(View.VISIBLE);
 				mSubscriberAudioOnlyView.setVisibility(View.GONE);
 			}
 		}
 	}
-
-	// Update publisher status bar when archiving stars/stops
+	
+	//Update publisher status bar when archiving stars/stops
 	public void updateArchivingStatus(boolean archiving) {
 		mArchiving = archiving;
-
+		
 		if (archiving) {
 			mPublisherFragment.showPublisherWidget(false);
 			mPublisherStatusFragment.updateArchivingUI(true);
@@ -648,15 +645,17 @@ public class ChatRoomActivity extends Activity implements
 			if (mRoom.getmCurrentParticipant() != null) {
 				mSubscriberFragment.showSubscriberWidget(true);
 			}
-		} else {
+		}
+		else {
 			mPublisherStatusFragment.updateArchivingUI(false);
 			setPublisherMargins();
 		}
 	}
-
-	// Convert dp to real pixels, according to the screen density.
-	public int dpToPx(int dp) {
-		double screenDensity = this.getResources().getDisplayMetrics().density;
-		return (int) (screenDensity * (double) dp);
-	}
+	
+	
+    //Convert dp to real pixels, according to the screen density.
+    public int dpToPx(int dp) {
+        double screenDensity = this.getResources().getDisplayMetrics().density;
+        return (int) (screenDensity * (double) dp);
+    }
 }
