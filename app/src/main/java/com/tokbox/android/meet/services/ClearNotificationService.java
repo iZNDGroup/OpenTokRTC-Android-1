@@ -1,4 +1,4 @@
-package com.tokbox.android.opentokrtc.services;
+package com.tokbox.android.meet.services;
 
 import android.app.NotificationManager;
 import android.app.Service;

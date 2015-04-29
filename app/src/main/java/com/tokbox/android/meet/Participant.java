@@ -1,4 +1,4 @@
-package com.tokbox.android.opentokrtc;
+package com.tokbox.android.meet;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -9,7 +9,7 @@ import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.OpentokError;
 import com.opentok.android.Stream;
 import com.opentok.android.Subscriber;
-import com.tokbox.android.opentokrtc.fragments.SubscriberQualityFragment.CongestionLevel;
+import com.tokbox.android.meet.fragments.SubscriberQualityFragment.CongestionLevel;
 
 public class Participant extends Subscriber {
 

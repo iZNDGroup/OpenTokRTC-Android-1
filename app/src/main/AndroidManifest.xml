@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.tokbox.android.opentokrtc"
-    android:versionCode="7"
-    android:versionName="2.4.0" >
+    package="com.tokbox.android.meet"
+    android:versionCode="1"
+    android:versionName="1.0.0">
 
     <uses-sdk
         android:minSdkVersion="16"
@@ -20,18 +20,19 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-        <service android:name="com.tokbox.android.opentokrtc.services.ClearNotificationService" >
-            <intent-filter android:label="@string/clearNotificationService" >
-                <action android:name="com.tokbox.android.opentokrtc.services.ClearNotificationService" />
+        android:theme="@style/AppTheme">
+        <service android:name="com.tokbox.android.meet.services.ClearNotificationService">
+            <intent-filter android:label="@string/clearNotificationService">
+                <action android:name="com.tokbox.android.meet.services.ClearNotificationService" />
             </intent-filter>
         </service>
+
         <activity
-            android:name="com.tokbox.android.opentokrtc.HomeActivity"
+            android:name="com.tokbox.android.meet.HomeActivity"
             android:clearTaskOnLaunch="false"
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,17 +40,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.tokbox.android.opentokrtc.ChatRoomActivity"
+            android:name="com.tokbox.android.meet.ChatRoomActivity"
             android:clearTaskOnLaunch="false"
             android:configChanges="orientation"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
+                <data
+                    android:host="meet.tokbox.com"
+                    android:scheme="http" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="otmeet" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="meet.tokbox.com"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
     </application>

@@ -1,6 +1,6 @@
 package com.tokbox.android.ui;
 
-import com.tokbox.android.opentokrtc.R;
+import com.tokbox.android.meet.R;
 
 import android.content.Context;
 import android.graphics.Bitmap;

@@ -1,4 +1,4 @@
-package com.tokbox.android.opentokrtc;
+package com.tokbox.android.meet;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.widget.EditText;
 
 public class HomeActivity extends Activity {
 
-    private static final String LOGTAG = "opentokrtc";
+    private static final String LOGTAG = "meet.tokbox";
 
     private static final String LAST_CONFERENCE_DATA = "LAST_CONFERENCE_DATA";
 

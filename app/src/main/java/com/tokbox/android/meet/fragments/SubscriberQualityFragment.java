@@ -1,8 +1,8 @@
-package com.tokbox.android.opentokrtc.fragments;
+package com.tokbox.android.meet.fragments;
 
-import com.tokbox.android.opentokrtc.ChatRoomActivity;
-import com.tokbox.android.opentokrtc.R;
-import com.tokbox.android.opentokrtc.fragments.SubscriberControlFragment.SubscriberCallbacks;
+import com.tokbox.android.meet.ChatRoomActivity;
+import com.tokbox.android.meet.R;
+import com.tokbox.android.meet.fragments.SubscriberControlFragment.SubscriberCallbacks;
 
 import android.app.Activity;
 import android.app.Fragment;

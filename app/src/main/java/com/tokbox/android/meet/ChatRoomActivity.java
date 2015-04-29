@@ -1,4 +1,4 @@
-package com.tokbox.android.opentokrtc;
+package com.tokbox.android.meet;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -49,13 +48,14 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.opentok.android.OpenTokConfig;
 import com.opentok.android.SubscriberKit;
-import com.tokbox.android.opentokrtc.fragments.PublisherControlFragment;
-import com.tokbox.android.opentokrtc.fragments.PublisherStatusFragment;
-import com.tokbox.android.opentokrtc.fragments.SubscriberControlFragment;
-import com.tokbox.android.opentokrtc.fragments.SubscriberQualityFragment;
-import com.tokbox.android.opentokrtc.services.ClearNotificationService;
-import com.tokbox.android.opentokrtc.services.ClearNotificationService.ClearBinder;
+import com.tokbox.android.meet.fragments.PublisherControlFragment;
+import com.tokbox.android.meet.fragments.PublisherStatusFragment;
+import com.tokbox.android.meet.fragments.SubscriberControlFragment;
+import com.tokbox.android.meet.fragments.SubscriberQualityFragment;
+import com.tokbox.android.meet.services.ClearNotificationService;
+import com.tokbox.android.meet.services.ClearNotificationService.ClearBinder;
 import com.tokbox.android.ui.AudioLevelView;
 
 public class ChatRoomActivity extends Activity implements
@@ -140,7 +140,11 @@ public class ChatRoomActivity extends Activity implements
             mRoomName = getIntent().getStringExtra(ARG_ROOM_ID);
             mUsername = getIntent().getStringExtra(ARG_USERNAME_ID);
         } else {
-            mRoomName = url.getPathSegments().get(0);
+            if (url.getScheme().equals("otmeet")) {
+                mRoomName = url.getHost();
+            } else {
+                mRoomName = url.getPathSegments().get(0);
+            }
         }
 
         TextView title = (TextView) findViewById(R.id.title);
@@ -198,7 +202,7 @@ public class ChatRoomActivity extends Activity implements
 
         //Add notification to status bar which gets removed if the user force kills the application.
         mNotifyBuilder = new NotificationCompat.Builder(this)
-                .setContentTitle("OpenTokRTC")
+                .setContentTitle("Meet TokBox")
                 .setContentText("Ongoing call")
                 .setSmallIcon(R.drawable.ic_launcher).setOngoing(true);
 
@@ -353,7 +357,7 @@ public class ChatRoomActivity extends Activity implements
                 String temp = EntityUtils.toString(roomEntity);
                 Log.i(LOGTAG, "retrieved room response: " + temp);
                 JSONObject roomJson = new JSONObject(temp);
-                sessionId = roomJson.getString("sid");
+                sessionId = roomJson.getString("sessionId");
                 token = roomJson.getString("token");
                 apiKey = roomJson.getString("apiKey");
                 mDidCompleteSuccessfully = true;
@@ -363,6 +367,16 @@ public class ChatRoomActivity extends Activity implements
                 mDidCompleteSuccessfully = false;
                 return null;
             }
+
+            try {
+                OpenTokConfig.setAPIRootURL(BuildConfig.MEET_ENVIRONMENT, true);
+                OpenTokConfig.setOTKitLogs(true);
+                OpenTokConfig.setJNILogs(true);
+                OpenTokConfig.setWebRTCLogs(true);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
             return new Room(ChatRoomActivity.this, params[0], sessionId, token,
                     apiKey, params[1]);
         }
@@ -389,7 +403,7 @@ public class ChatRoomActivity extends Activity implements
             URI roomURI;
             URL url;
 
-            String urlStr = "https://opentokrtc.com/" + room + ".json";
+            String urlStr = getResources().getString(R.string.serverURL) + room;
             try {
                 url = new URL(urlStr);
                 roomURI = new URI(url.getProtocol(), url.getUserInfo(),
@@ -405,6 +419,7 @@ public class ChatRoomActivity extends Activity implements
                 return;
             }
             mHttpGet = new HttpGet(roomURI);
+            mHttpGet.addHeader("Accept", "application/json, text/plain, */*");
         }
     }
 

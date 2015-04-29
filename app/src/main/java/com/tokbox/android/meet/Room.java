@@ -1,4 +1,4 @@
-package com.tokbox.android.opentokrtc;
+package com.tokbox.android.meet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +27,7 @@ import com.opentok.android.BaseVideoRenderer;
 import com.opentok.android.Connection;
 import com.opentok.android.OpentokError;
 import com.opentok.android.Publisher;
+import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
 
@@ -252,19 +253,34 @@ public class Room extends Session {
 
     @Override
     protected void onConnected() {
-        Publisher p = new Publisher(mContext, "Android");
-        mPublisher = p;
+        mPublisher = new Publisher(mContext, "Android");
         mPublisher.setName(mPublisherName);
-        publish(p);
+        mPublisher.setPublisherListener(new PublisherKit.PublisherListener() {
+            @Override
+            public void onStreamCreated(PublisherKit publisherKit, Stream stream) {
+                Log.d(LOGTAG, "onStreamCreated!!");
+            }
+
+            @Override
+            public void onStreamDestroyed(PublisherKit publisherKit, Stream stream) {
+                Log.d(LOGTAG, "onStreamDestroyed!!");
+            }
+
+            @Override
+            public void onError(PublisherKit publisherKit, OpentokError opentokError) {
+                Log.d(LOGTAG, "onError!!");
+            }
+        });
+        publish(mPublisher);
 
         // Add video preview
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        SurfaceView v = (SurfaceView) p.getView();
+        SurfaceView v = (SurfaceView) mPublisher.getView();
         v.setZOrderOnTop(true);
 
         mPreview.addView(v, lp);
-        p.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
+        mPublisher.setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE,
                 BaseVideoRenderer.STYLE_VIDEO_FILL);
 
         presentText((mActivity.getResources().getString(R.string.welcome_text_chat)));

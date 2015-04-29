@@ -7,11 +7,15 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 7
-        versionName "2.4.0"
+        versionCode 1
+        versionName "1.0.0"
     }
     buildTypes {
+        debug {
+            buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
+        }    
         release {
+            buildConfigField "String", "MEET_ENVIRONMENT", "\"$System.env.MEET_ENVIRONMENT\""
         }
     }
 
