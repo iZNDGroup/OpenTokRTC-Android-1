@@ -122,13 +122,13 @@ public class SubscriberControlFragment extends Fragment implements
                 mSubscriberWidgetTimerTask);
         chatRoomActivity.getHandler().postDelayed(mSubscriberWidgetTimerTask,
                 SUBSCRIBER_CONTROLS_DURATION);
-        mSubscriberName.setText(chatRoomActivity.getRoom().getCurrentParticipant().getStream()
-                .getName());
+        /*mSubscriberName.setText(chatRoomActivity.getRoom().getLParticipant().getStream()
+                .getName());*/
     }
 
     public void initSubscriberWidget() {
-        mSubscriberMute.setImageResource(chatRoomActivity.getRoom().getCurrentParticipant()
-                .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
+       /* mSubscriberMute.setImageResource(chatRoomActivity.getRoom().getCurrentParticipant()
+                .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);*/
     }
 
     private Runnable mSubscriberWidgetTimerTask = new Runnable() {
@@ -169,8 +169,8 @@ public class SubscriberControlFragment extends Fragment implements
     public void muteSubscriber() {
         mCallbacks.onMuteSubscriber();
 
-        mSubscriberMute.setImageResource(chatRoomActivity.getRoom().getCurrentParticipant()
-                .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);
+        /*mSubscriberMute.setImageResource(chatRoomActivity.getRoom().getCurrentParticipant()
+                .getSubscribeToAudio() ? R.drawable.unmute_sub : R.drawable.mute_sub);*/
     }
 
 }

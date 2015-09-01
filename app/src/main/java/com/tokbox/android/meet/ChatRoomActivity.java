@@ -32,35 +32,27 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.opentok.android.OpenTokConfig;
-import com.opentok.android.SubscriberKit;
-import com.tokbox.android.meet.fragments.PublisherControlFragment;
-import com.tokbox.android.meet.fragments.PublisherStatusFragment;
-import com.tokbox.android.meet.fragments.SubscriberControlFragment;
-import com.tokbox.android.meet.fragments.SubscriberQualityFragment;
 import com.tokbox.android.meet.services.ClearNotificationService;
 import com.tokbox.android.meet.services.ClearNotificationService.ClearBinder;
 import com.tokbox.android.ui.AudioLevelView;
 
-public class ChatRoomActivity extends Activity implements
-        SubscriberControlFragment.SubscriberCallbacks,
-        PublisherControlFragment.PublisherCallbacks {
+public class ChatRoomActivity extends Activity {
 
     private static final String LOGTAG = "ChatRoomActivity";
 
@@ -72,31 +64,23 @@ public class ChatRoomActivity extends Activity implements
     private String mRoomName;
     private Room mRoom;
     private String mUsername = null;
-    private boolean mSubscriberVideoOnly = false;
-    private boolean mArchiving = false;
 
     private ProgressDialog mConnectingDialog;
     private AlertDialog mErrorDialog;
     private EditText mMessageEditText;
-    private ViewGroup mPreview;
-    private ViewPager mParticipantsView;
-    private ImageView mLeftArrowImage;
-    private ImageView mRightArrowImage;
-    private ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
-    private RelativeLayout mSubscriberAudioOnlyView;
     private RelativeLayout mMessageBox;
     private AudioLevelView mAudioLevelView;
-
-    protected SubscriberControlFragment mSubscriberFragment;
-    protected PublisherControlFragment mPublisherFragment;
-    protected PublisherStatusFragment mPublisherStatusFragment;
-    protected SubscriberQualityFragment mSubscriberQualityFragment;
 
     protected Handler mHandler = new Handler();
     private NotificationCompat.Builder mNotifyBuilder;
     private NotificationManager mNotificationManager;
     private ServiceConnection mConnection;
     private boolean mIsBound = false;
+
+    private ViewGroup mPreview;
+    private ViewGroup mLastParticipantView;
+    private LinearLayout mParticipantsView;
+    private ProgressBar mLoadingSub; // Spinning wheel for loading subscriber view
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +90,7 @@ public class ChatRoomActivity extends Activity implements
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.room_layout);
+        setContentView(R.layout.chat_room_layout);
 
         //Custom title bar
         ActionBar actionBar = getActionBar();
@@ -122,13 +106,10 @@ public class ChatRoomActivity extends Activity implements
         mMessageEditText = (EditText) findViewById(R.id.message);
 
         mPreview = (ViewGroup) findViewById(R.id.publisherview);
-        mParticipantsView = (ViewPager) findViewById(R.id.pager);
-        mLeftArrowImage = (ImageView) findViewById(R.id.left_arrow);
-        mRightArrowImage = (ImageView) findViewById(R.id.right_arrow);
-        mSubscriberAudioOnlyView = (RelativeLayout) findViewById(R.id.audioOnlyView);
+        mParticipantsView = (LinearLayout) findViewById(R.id.gallery);
+        mLastParticipantView = (ViewGroup) findViewById(R.id.mainsubscriberView);
         mLoadingSub = (ProgressBar) findViewById(R.id.loadingSpinner);
 
-        //Initialize
         mAudioLevelView = (AudioLevelView) findViewById(R.id.subscribermeter);
         mAudioLevelView.setIcons(BitmapFactory.decodeResource(getResources(),
                 R.drawable.headset));
@@ -150,13 +131,6 @@ public class ChatRoomActivity extends Activity implements
         TextView title = (TextView) findViewById(R.id.title);
         title.setText(mRoomName);
 
-        if (savedInstanceState == null) {
-            initSubscriberFragment();
-            initPublisherFragment();
-            initPublisherStatusFragment();
-            initSubscriberQualityFragment();
-        }
-
         mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         initializeRoom();
@@ -168,9 +142,10 @@ public class ChatRoomActivity extends Activity implements
         super.onConfigurationChanged(newConfig);
 
         // Remove publisher & subscriber views because we want to reuse them
-        if (mRoom != null && mRoom.getCurrentParticipant() != null) {
+        if (mRoom != null && mRoom.getParticipants().size() > 0) {
             mRoom.getParticipantsViewContainer()
-                    .removeView(mRoom.getCurrentParticipant().getView());
+                    .removeAllViews();
+            mRoom.getLastParticipantView().removeAllViews();
         }
         reloadInterface();
     }
@@ -194,9 +169,11 @@ public class ChatRoomActivity extends Activity implements
         if (mRoom != null) {
             mRoom.onPause();
 
-            if (mRoom != null && mRoom.getCurrentParticipant() != null) {
+            // Remove publisher & subscriber views because we want to reuse them
+            if (mRoom != null && mRoom.getParticipants().size() > 0) {
                 mRoom.getParticipantsViewContainer()
-                        .removeView(mRoom.getCurrentParticipant().getView());
+                        .removeAllViews();
+                mRoom.getLastParticipantView().removeAllViews();
             }
         }
 
@@ -309,9 +286,13 @@ public class ChatRoomActivity extends Activity implements
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (mRoom != null && mRoom.getCurrentParticipant() != null) {
-                    mRoom.getParticipantsViewContainer()
-                            .addView(mRoom.getCurrentParticipant().getView());
+
+                if (mRoom != null && mRoom.getParticipants().size() > 0) {
+                    for(int i = 0; i< mRoom.getParticipants().size()-1; i++) {
+                        mRoom.getParticipantsViewContainer()
+                                .addView(mRoom.getParticipants().get(i).getView());
+                    }
+                    mRoom.getLastParticipantView().addView(mRoom.getLastParticipant().getView());
                 }
             }
         }, 500);
@@ -386,9 +367,8 @@ public class ChatRoomActivity extends Activity implements
             if (mDidCompleteSuccessfully) {
                 mConnectingDialog.dismiss();
                 mRoom = room;
-                mPreview.setOnClickListener(onViewClick);
                 mRoom.setPreviewView(mPreview);
-                mRoom.setParticipantsViewContainer(mParticipantsView, onViewClick);
+                mRoom.setParticipantsViewContainer(mParticipantsView, mLastParticipantView, null);
                 mRoom.setMessageView((TextView) findViewById(R.id.messageView),
                         (ScrollView) findViewById(R.id.scroller));
                 mRoom.connect();
@@ -466,42 +446,6 @@ public class ChatRoomActivity extends Activity implements
         startActivity(sendIntent);
     }
 
-    public void onPublisherViewClick(View v) {
-        if (mRoom != null && mRoom.getCurrentParticipant() != null) {
-            mRoom.getCurrentParticipant().getView()
-                    .setOnClickListener(onViewClick);
-        }
-    }
-
-    //Initialize fragments
-    public void initPublisherFragment() {
-        mPublisherFragment = new PublisherControlFragment();
-        getFragmentManager().beginTransaction()
-                .add(R.id.fragment_pub_container, mPublisherFragment)
-                .commit();
-    }
-
-    public void initPublisherStatusFragment() {
-        mPublisherStatusFragment = new PublisherStatusFragment();
-        getFragmentManager().beginTransaction()
-                .add(R.id.fragment_pub_status_container, mPublisherStatusFragment)
-                .commit();
-    }
-
-    public void initSubscriberFragment() {
-        mSubscriberFragment = new SubscriberControlFragment();
-        getFragmentManager().beginTransaction()
-                .add(R.id.fragment_sub_container, mSubscriberFragment).commit();
-    }
-
-    public void initSubscriberQualityFragment() {
-        mSubscriberQualityFragment = new SubscriberQualityFragment();
-        getFragmentManager()
-                .beginTransaction()
-                .add(R.id.fragment_sub_quality_container,
-                        mSubscriberQualityFragment).commit();
-    }
-
     public Room getRoom() {
         return mRoom;
     }
@@ -510,252 +454,76 @@ public class ChatRoomActivity extends Activity implements
         return this.mHandler;
     }
 
-    public ProgressBar getLoadingSub() {
-        return mLoadingSub;
-    }
-
     public void updateLoadingSub() {
         mRoom.loadSubscriberView();
     }
 
-    //Callbacks
-    @Override
-    public void onMuteSubscriber() {
-        if (mRoom.getCurrentParticipant() != null) {
-            mRoom.getCurrentParticipant().setSubscribeToAudio(
-                    !mRoom.getCurrentParticipant().getSubscribeToAudio());
+    //last participant video view
+    public void disableVideo(View view){
+        boolean enableAudioOnly = this.mRoom.getLastParticipant().getSubscribeToVideo();
+        if (enableAudioOnly) {
+            this.mRoom.getLastParticipant().setSubscribeToVideo(false);
         }
-    }
-
-    @Override
-    public void onMutePublisher() {
-        if (mRoom.getPublisher() != null) {
-            mRoom.getPublisher().setPublishAudio(
-                    !mRoom.getPublisher().getPublishAudio());
-        }
-    }
-
-    @Override
-    public void onSwapCamera() {
-        if (mRoom.getPublisher() != null) {
-            mRoom.getPublisher().swapCamera();
-        }
-    }
-
-    @Override
-    public void onEndCall() {
-        if (mRoom != null) {
-            mRoom.disconnect();
+        else {
+            this.mRoom.getLastParticipant().setSubscribeToVideo(true);
         }
 
-        finish();
+        setAudioOnlyViewLastParticipant(enableAudioOnly, this.mRoom.getLastParticipant());
     }
 
-    @Override
-    public void onStatusPubBar() {
-        setPublisherMargins();
-    }
-
-    @Override
-    public void onStatusSubBar() {
-        showArrowsOnSubscriber();
-    }
-
-    //Adjust publisher view if its control bar is hidden
-    public void setPublisherMargins() {
-        int bottomMargin = 0;
-        RelativeLayout.LayoutParams params = (LayoutParams) mPreview
-                .getLayoutParams();
-        RelativeLayout.LayoutParams pubControlLayoutParams = (LayoutParams) mPublisherFragment
-                .getPublisherContainer().getLayoutParams();
-        RelativeLayout.LayoutParams pubStatusLayoutParams = (LayoutParams) mPublisherStatusFragment
-                .getPubStatusContainer().getLayoutParams();
-
-        if (mPublisherFragment.isPublisherWidgetVisible() && mArchiving) {
-            bottomMargin = pubControlLayoutParams.height
-                    + pubStatusLayoutParams.height + dpToPx(20);
-        } else {
-            if (mPublisherFragment.isPublisherWidgetVisible()) {
-                bottomMargin = pubControlLayoutParams.height + dpToPx(20);
-            } else {
-                params.addRule(RelativeLayout.ALIGN_BOTTOM);
-                bottomMargin = dpToPx(20);
-            }
-        }
-        params.bottomMargin = bottomMargin;
-        params.leftMargin = dpToPx(20);
-        mPreview.setLayoutParams(params);
-
-        setSubQualityMargins();
-    }
-
-    public void setSubQualityMargins() {
-        if (mRoom.getParticipants() != null) {
-            RelativeLayout.LayoutParams subQualityLayoutParams
-                    = (LayoutParams) mSubscriberQualityFragment
-                    .getSubQualityContainer().getLayoutParams();
-            boolean pubControlBarVisible = mPublisherFragment
-                    .isPublisherWidgetVisible();
-            boolean pubStatusBarVisible = mPublisherStatusFragment
-                    .isPubStatusWidgetVisible();
-            RelativeLayout.LayoutParams pubControlLayoutParams = (LayoutParams) mPublisherFragment
-                    .getPublisherContainer().getLayoutParams();
-            RelativeLayout.LayoutParams pubStatusLayoutParams
-                    = (LayoutParams) mPublisherStatusFragment
-                    .getPubStatusContainer().getLayoutParams();
-
-            int bottomMargin = 0;
-
-            // control pub fragment
-            if (getResources().getConfiguration().orientation
-                    == Configuration.ORIENTATION_PORTRAIT) {
-                if (pubControlBarVisible) {
-                    bottomMargin = pubControlLayoutParams.height + dpToPx(10);
-                }
-                if (pubStatusBarVisible && mArchiving) {
-                    bottomMargin = pubStatusLayoutParams.height + dpToPx(10);
-                }
-                if (bottomMargin == 0) {
-                    bottomMargin = dpToPx(10);
-                }
-                subQualityLayoutParams.rightMargin = dpToPx(10);
-            }
-
-            subQualityLayoutParams.bottomMargin = bottomMargin;
-
-            mSubscriberQualityFragment.getSubQualityContainer()
-                    .setLayoutParams(subQualityLayoutParams);
-        }
-    }
-
-    private OnClickListener onViewClick = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            boolean visible = false;
-
-            if (mRoom.getPublisher() != null) {
-                // check visibility of bars
-                if (!mPublisherFragment.isPublisherWidgetVisible()) {
-                    visible = true;
-                }
-                mPublisherFragment.publisherClick();
-                if (mArchiving) {
-                    mPublisherStatusFragment.publisherClick();
-                }
-                setPublisherMargins();
-
-                if (mRoom.getCurrentParticipant() != null) {
-                    mSubscriberFragment.showSubscriberWidget(visible);
-                    mSubscriberFragment.initSubscriberUI();
-                    showArrowsOnSubscriber();
-                }
-            }
-        }
-    };
-
-    //Show next and last arrow on subscriber view if the number of subscribers is higher than 1
-    public void showArrowsOnSubscriber() {
-        boolean show = false;
-        if (mRoom.getParticipants().size() > 1) {
-            if (mLeftArrowImage.getVisibility() == View.GONE) {
-                show = true;
-            } else {
-                show = false;
-            }
-            mLeftArrowImage.clearAnimation();
-            mRightArrowImage.clearAnimation();
-            float dest = show ? 1.0f : 0.0f;
-            AlphaAnimation aa = new AlphaAnimation(1.0f - dest, dest);
-            aa.setDuration(ANIMATION_DURATION);
-            aa.setFillAfter(true);
-            mLeftArrowImage.startAnimation(aa);
-            mRightArrowImage.startAnimation(aa);
-        }
-
-        if (show) {
-            mLeftArrowImage.setVisibility(View.VISIBLE);
-            mRightArrowImage.setVisibility(View.VISIBLE);
-            //to show all the controls
-            if (mRoom.getPublisher() != null) {
-                mPublisherStatusFragment.showPubStatusWidget(true);
-            }
-            mSubscriberFragment.showSubscriberWidget(true);
-        } else {
-            mLeftArrowImage.setVisibility(View.GONE);
-            mRightArrowImage.setVisibility(View.GONE);
-        }
-    }
-
-    public void nextParticipant(View view) {
-        int nextPosition = mRoom.getCurrentPosition() + 1;
-        mParticipantsView.setCurrentItem(nextPosition);
-
-        //reload subscriber controls UI
-        mSubscriberFragment.initSubscriberWidget();
-        mSubscriberFragment.showSubscriberWidget(true);
-    }
-
-    public void lastParticipant(View view) {
-        int nextPosition = mRoom.getCurrentPosition() - 1;
-        mParticipantsView.setCurrentItem(nextPosition);
-
-        //reload subscriber controls UI
-        mSubscriberFragment.initSubscriberWidget();
-        mSubscriberFragment.showSubscriberWidget(true);
-    }
-
-    //Show audio only icon when video quality changed and it is disabled for the subscriber
-    public void setAudioOnlyView(boolean audioOnlyEnabled, Participant participant) {
-        mSubscriberVideoOnly = audioOnlyEnabled;
+    //Show audio only icon when video quality changed and it is disabled for the last subscriber
+    public void setAudioOnlyViewLastParticipant(boolean audioOnlyEnabled, Participant participant) {
+        boolean subscriberVideoOnly = audioOnlyEnabled;
 
         if (audioOnlyEnabled) {
-            participant.getView().setVisibility(View.GONE);
-            mSubscriberAudioOnlyView.setVisibility(View.VISIBLE);
-            mSubscriberAudioOnlyView.setOnClickListener(onViewClick);
+            this.mRoom.getLastParticipantView().removeView(participant.getView());
+            this.mRoom.getLastParticipantView().addView(getAudioOnlyIcon());
 
-            // Audio only text for subscriber
-            TextView subStatusText = (TextView) findViewById(R.id.subscriberName);
-            subStatusText.setText(R.string.audioOnly);
-            AlphaAnimation aa = new AlphaAnimation(1.0f, 0.0f);
-            aa.setDuration(ANIMATION_DURATION);
-            subStatusText.startAnimation(aa);
-
-            participant
-                    .setAudioLevelListener(new SubscriberKit.AudioLevelListener() {
-                        @Override
-                        public void onAudioLevelUpdated(
-                                SubscriberKit subscriber, float audioLevel) {
-                            mAudioLevelView.setMeterValue(audioLevel);
-                        }
-                    });
+            //TODO add audiometer
         } else {
-            if (!mSubscriberVideoOnly) {
-                participant.getView().setVisibility(View.VISIBLE);
-                mSubscriberAudioOnlyView.setVisibility(View.GONE);
+            if (!subscriberVideoOnly) {
+                this.mRoom.getLastParticipantView().removeAllViews();
+                this.mRoom.getLastParticipantView().addView(participant.getView());
             }
         }
     }
 
-    //Update publisher status bar when archiving stars/stops
-    public void updateArchivingStatus(boolean archiving) {
-        mArchiving = archiving;
+    public void setAudioOnlyViewListPartcipants (boolean audioOnlyEnabled, Participant participant, int index , View.OnClickListener clickListener) {
 
-        if (archiving) {
-            mPublisherFragment.showPublisherWidget(false);
-            mPublisherStatusFragment.updateArchivingUI(true);
-            mPublisherFragment.showPublisherWidget(true);
-            mPublisherFragment.initPublisherUI();
-            setPublisherMargins();
+        Log.d(LOGTAG, "set AudioOnlyViewListPartcipants "+ audioOnlyEnabled + "INDEX: " + index);
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                480, 320);
 
-            if (mRoom.getCurrentParticipant() != null) {
-                mSubscriberFragment.showSubscriberWidget(true);
-            }
+        if (audioOnlyEnabled) {
+            this.mRoom.getParticipantsViewContainer().removeViewAt(index);
+            View audioOnlyView = getAudioOnlyIcon();
+            audioOnlyView.setOnClickListener(clickListener);
+            audioOnlyView.setTag(index);
+            this.mRoom.getParticipantsViewContainer().addView(audioOnlyView, index, lp);
+
         } else {
-            mPublisherStatusFragment.updateArchivingUI(false);
-            setPublisherMargins();
+            this.mRoom.getParticipantsViewContainer().removeViewAt(index);
+            this.mRoom.getParticipantsViewContainer().addView(participant.getView(), index, lp);
+
         }
+
     }
 
+    public ImageView getAudioOnlyIcon() {
+
+        ImageView imageView = new ImageView(this);
+        //setting image resource
+        imageView.setImageResource(R.drawable.avatar);
+        //setting image position
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        return imageView;
+    }
+
+    public ProgressBar getLoadingSub() {
+        return mLoadingSub;
+    }
 
     //Convert dp to real pixels, according to the screen density.
     public int dpToPx(int dp) {

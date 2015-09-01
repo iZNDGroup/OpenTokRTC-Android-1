@@ -9,14 +9,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
@@ -30,6 +35,7 @@ import com.opentok.android.Publisher;
 import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
+import com.opentok.android.VideoUtils;
 
 public class Room extends Session {
 
@@ -42,7 +48,7 @@ public class Room extends Session {
     private String token;
 
     private Publisher mPublisher;
-    private Participant mCurrentParticipant;
+    private Participant mLastParticipant;
     private int mCurrentPosition;
     private String mPublisherName = null;
     private HashMap<Stream, Participant> mParticipantStream = new HashMap<Stream, Participant>();
@@ -53,77 +59,15 @@ public class Room extends Session {
     private ViewGroup mPreview;
     private TextView mMessageView;
     private ScrollView mMessageScroll;
-    private ViewPager mParticipantsViewContainer;
+    private LinearLayout mParticipantsViewContainer;
+
+    private ViewGroup mLastParticipantView;
     private OnClickListener onSubscriberUIClick;
 
     private Handler mHandler;
 
     private ChatRoomActivity mActivity;
 
-    private PagerAdapter mPagerAdapter = new PagerAdapter() {
-
-        @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return ((Participant) arg1).getView() == arg0;
-        }
-
-        @Override
-        public int getCount() {
-            return mParticipants.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            if (position < mParticipants.size()) {
-                return mParticipants.get(position).getName();
-            } else {
-                return null;
-            }
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Participant p = mParticipants.get(position);
-            container.addView(p.getView());
-            return p;
-        }
-
-        @Override
-        public void setPrimaryItem(ViewGroup container, int position,
-                Object object) {
-            for (Participant p : mParticipants) {
-                if (p == object) {
-                    mCurrentParticipant = p;
-                    if (!p.getSubscribeToVideo()) {
-                        p.setSubscribeToVideo(true);
-                    }
-                    if (p.getSubscriberVideoOnly()) {
-                        mActivity.setAudioOnlyView(true, p);
-                    }
-                } else {
-                    if (p.getSubscribeToVideo()) {
-                        p.setSubscribeToVideo(false);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            Participant p = (Participant) object;
-            container.removeView(p.getView());
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            for (int i = 0; i < mParticipants.size(); i++) {
-                if (mParticipants.get(i) == object) {
-                    return i;
-                }
-            }
-            return POSITION_NONE;
-        }
-    };
 
     public Room(Context context, String roomName, String sessionId, String token, String apiKey,
             String username) {
@@ -135,13 +79,15 @@ public class Room extends Session {
         this.mPublisherName = username;
         this.mHandler = new Handler(context.getMainLooper());
         this.mActivity = (ChatRoomActivity) this.mContext;
+
+
     }
 
-    public void setParticipantsViewContainer(ViewPager container,
+    public void setParticipantsViewContainer(LinearLayout container, ViewGroup lastParticipantView,
             OnClickListener onSubscriberUIClick) {
         this.mParticipantsViewContainer = container;
+        this.mLastParticipantView = lastParticipantView;
         this.onSubscriberUIClick = onSubscriberUIClick;
-        mPagerAdapter.notifyDataSetChanged();
     }
 
     public void setMessageView(TextView et, ScrollView scroller) {
@@ -169,44 +115,24 @@ public class Room extends Session {
         }
     }
 
-    public void loadSubscriberView() {
-        //stop loading spinning
-        if (mActivity.getLoadingSub().getVisibility() == View.VISIBLE) {
-            mActivity.getLoadingSub().setVisibility(View.GONE);
-        }
-
-        //show control bars
-        mActivity.mSubscriberFragment.showSubscriberWidget(true);
-        mActivity.mSubscriberFragment.initSubscriberUI();
-        if (mPublisher != null) {
-            mActivity.mPublisherFragment.showPublisherWidget(true);
-            mActivity.setPublisherMargins();
-        }
-        mActivity.showArrowsOnSubscriber();
-    }
-
     public Publisher getPublisher() {
         return mPublisher;
     }
 
-    public Participant getCurrentParticipant() {
-        return mCurrentParticipant;
+    public Participant getLastParticipant() {
+        return mLastParticipant;
     }
 
     public ArrayList<Participant> getParticipants() {
         return mParticipants;
     }
 
-    public PagerAdapter getPagerAdapter() {
-        return mPagerAdapter;
-    }
-
-    public int getCurrentPosition() {
-        return mCurrentPosition;
-    }
-
-    public ViewPager getParticipantsViewContainer() {
+    public LinearLayout getParticipantsViewContainer() {
         return mParticipantsViewContainer;
+    }
+
+    public ViewGroup getLastParticipantView() {
+        return mLastParticipantView;
     }
 
     private void presentMessage(String who, String message) {
@@ -293,28 +219,44 @@ public class Room extends Session {
     @Override
     protected void onStreamReceived(Stream stream) {
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mActivity.mPublisherFragment.showPublisherWidget(true);
-                mActivity.mPublisherFragment.initPublisherUI();
-            }
-        }, 0);
-
         Participant p = new Participant(mContext, stream);
 
         //We can use connection data to obtain each user id
         p.setUserId(stream.getConnection().getData());
 
-        //Subscribe to audio only if we have more than 1 subscribed participant
-        if (mParticipants.size() != 0) {
-            p.setSubscribeToVideo(false);
-        } else {
-            // start loading spinning
-            mActivity.getLoadingSub().setVisibility(View.VISIBLE);
-        }
+        if ( mParticipants.size() > 0 ) {
+            final Participant lastParticipant = mParticipants.get(mParticipants.size() - 1);
+            this.mLastParticipantView.removeView(lastParticipant.getView());
 
-        p.getView().setOnClickListener(this.onSubscriberUIClick);
+            final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    480, 320);
+            lastParticipant.setPreferredResolution(new VideoUtils.Size(320, 240)); //TODO set the view size as preferred resolution
+            this.mParticipantsViewContainer.addView(lastParticipant.getView(), lp);
+            lastParticipant.setSubscribeToVideo(true);
+            lastParticipant.getView().setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean enableAudioOnly = lastParticipant.getSubscribeToVideo();
+
+                    if (enableAudioOnly) {
+                        lastParticipant.setSubscribeToVideo(false);
+                    }
+                    else {
+                        lastParticipant.setSubscribeToVideo(true);
+                    }
+                    int index = mParticipantsViewContainer.indexOfChild(lastParticipant.getView());
+                    if ( index == -1 ){
+                        index = (int)v.getTag();
+                    }
+                    mActivity.setAudioOnlyViewListPartcipants(enableAudioOnly, lastParticipant, index, this);
+
+                }
+            });
+        }
+        mActivity.getLoadingSub().setVisibility(View.VISIBLE);
+        p.setPreferredResolution(new VideoUtils.Size(640, 480));
+
+        mLastParticipant = p;
 
         //Subscribe to this participant
         this.subscribe(p);
@@ -325,9 +267,6 @@ public class Room extends Session {
 
         presentText("\n" + p.getName() + " has joined the chat");
 
-        this.mParticipantsViewContainer.setAdapter(mPagerAdapter);
-        mPagerAdapter.notifyDataSetChanged();
-
     }
 
     @Override
@@ -337,13 +276,10 @@ public class Room extends Session {
             mParticipants.remove(p);
             mParticipantStream.remove(stream);
             mParticipantConnection.remove(stream.getConnection().getConnectionId());
-            mPagerAdapter.notifyDataSetChanged();
-            mCurrentParticipant = null;
+
+            mLastParticipant = null;
 
             presentText("\n" + p.getName() + " has left the chat");
-            mActivity.showArrowsOnSubscriber();
-            mActivity.mSubscriberFragment.showSubscriberWidget(false);
-            mActivity.mSubscriberQualityFragment.showSubscriberWidget(false);
         }
 
     }
@@ -410,23 +346,13 @@ public class Room extends Session {
     @Override
     protected void onArchiveStarted(String id, String name) {
         super.onArchiveStarted(id, name);
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mActivity.updateArchivingStatus(true);
-            }
-        }, 0);
+
     }
 
     @Override
     protected void onArchiveStopped(String id) {
         super.onArchiveStopped(id);
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mActivity.updateArchivingStatus(false);
-            }
-        }, 0);
+
     }
 
     @Override
@@ -434,5 +360,16 @@ public class Room extends Session {
         super.onError(error);
         Toast.makeText(this.mContext, error.getMessage(), Toast.LENGTH_SHORT).show();
     }
+
+    public void loadSubscriberView() {
+        //stop loading spinning
+        if (mActivity.getLoadingSub().getVisibility() == View.VISIBLE) {
+            mActivity.getLoadingSub().setVisibility(View.GONE);
+
+            this.mLastParticipantView.addView(mLastParticipant.getView());
+        }
+
+    }
+
 
 }

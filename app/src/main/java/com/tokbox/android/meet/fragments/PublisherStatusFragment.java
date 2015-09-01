@@ -94,7 +94,7 @@ public class PublisherStatusFragment extends Fragment {
         public void run() {
             if (mArchiving) {
                 showPubStatusWidget(false);
-                chatRoomActivity.setPublisherMargins();
+
             }
         }
     };

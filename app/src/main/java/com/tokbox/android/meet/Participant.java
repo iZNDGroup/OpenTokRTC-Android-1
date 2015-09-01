@@ -53,11 +53,6 @@ public class Participant extends Subscriber {
         Log.i(LOGTAG, "Video is disabled for the subscriber. Reason: " + reason);
         if (reason.equals("quality")) {
             mSubscriberVideoOnly = true;
-            mActivity.setAudioOnlyView(true, this);
-
-            mActivity.mSubscriberQualityFragment.setCongestion(CongestionLevel.High);
-            mActivity.setSubQualityMargins();
-            mActivity.mSubscriberQualityFragment.showSubscriberWidget(true);
         }
     }
 
@@ -69,29 +64,20 @@ public class Participant extends Subscriber {
         if (reason.equals("quality")) {
 
             mSubscriberVideoOnly = false;
-            mActivity.setAudioOnlyView(false, this);
-
-            mActivity.mSubscriberQualityFragment.setCongestion(CongestionLevel.Low);
-            mActivity.mSubscriberQualityFragment.showSubscriberWidget(false);
-        }
+           }
     }
 
     @Override
     public void onVideoDisableWarning() {
         Log.i(LOGTAG,
                 "Video may be disabled soon due to network quality degradation. Add UI handling here.");
-        mActivity.mSubscriberQualityFragment.setCongestion(CongestionLevel.Mid);
-        mActivity.setSubQualityMargins();
-        mActivity.mSubscriberQualityFragment.showSubscriberWidget(true);
-    }
+       }
 
     @Override
     public void onVideoDisableWarningLifted() {
         Log.i(LOGTAG,
                 "Video may no longer be disabled as stream quality improved. Add UI handling here.");
-        mActivity.mSubscriberQualityFragment.setCongestion(CongestionLevel.Low);
-        mActivity.mSubscriberQualityFragment.showSubscriberWidget(false);
-    }
+      }
 
     @Override
     protected void onVideoDataReceived() {
@@ -110,7 +96,7 @@ public class Participant extends Subscriber {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 this.mContext);
 
-        alertDialogBuilder.setTitle("OpenTokRTC Error");
+        alertDialogBuilder.setTitle(R.string.error_title);
         alertDialogBuilder
                 .setMessage(error.getMessage())
                 .setCancelable(false)
